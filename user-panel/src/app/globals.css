@@ -1,0 +1,161 @@
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #0f172a;
+  color: white;
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  font-size: clamp(1.8rem, 6vw, 3rem);
+  margin-bottom: 20px;
+}
+
+.current-token {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: clamp(3.5rem, 18vw, 8rem);
+  font-weight: 700;
+
+  background: #22c55e;
+  color: #020617;
+
+  padding: clamp(18px, 6vw, 32px) clamp(40px, 14vw, 90px);
+
+  border-radius: 20px;
+  margin-bottom: 40px;
+
+  min-width: 180px;
+  box-shadow: 0 10px 25px rgba(34, 197, 94, 0.45);
+}
+
+.subtitle {
+  font-size: clamp(1.2rem, 5vw, 2rem);
+  margin-bottom: 20px;
+}
+
+.upcoming {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.token {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: clamp(1.5rem, 6vw, 2.5rem);
+  font-weight: 600;
+
+  background: #334155;
+  color: white;
+
+  padding: 14px 26px;
+  border-radius: 14px;
+
+  min-width: 64px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.35);
+}
+
+/* ===============================
+   RESPONSIVE (<= 580px)
+   =============================== */
+
+@media (max-width: 580px) {
+  .container {
+    padding: 20px;
+  }
+
+  .current-token {
+    margin-bottom: 30px;
+    border-radius: 16px;
+  }
+
+  .upcoming {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .token {
+    padding: 12px 20px;
+    border-radius: 10px;
+  }
+}
+
+/* ===============================
+   RESPONSIVE (<= 300px)
+   =============================== */
+
+@media (max-width: 300px) {
+  .container {
+    padding: 12px;
+  }
+
+  .current-token {
+    padding: 14px 20px;
+    border-radius: 14px;
+  }
+
+  .token {
+    padding: 10px 16px;
+  }
+
+  .upcoming {
+    gap: 10px;
+  }
+}

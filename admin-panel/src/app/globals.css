@@ -1,0 +1,384 @@
+/* Admin Panel Styles */
+
+:root {
+  --primary-color: #2563eb;
+  --secondary-color: #059669;
+  --danger-color: #dc2626;
+  --background: #f3f4f6;
+  --card-bg: #ffffff;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
+  background-color: var(--background);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.admin-container {
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.admin-panel {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 600px;
+}
+
+.admin-heading {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 32px;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Token Display Boxes */
+.current-token-box,
+.last-token-box {
+  background-color: #f9fafb;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.token-display {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.token-code {
+  background-color: #1f2937;
+  color: #10b981;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-family: "Monaco", "Courier New", monospace;
+  font-size: 12px;
+  word-break: break-all;
+  font-weight: 500;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.no-token {
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+}
+
+.token-meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 12px;
+}
+
+.token-meta strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Button Styles */
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #047857;
+}
+
+/* Last Token Section */
+.last-token-section {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Responsive Design for Tablets (768px and below) */
+@media (max-width: 768px) {
+  .admin-panel {
+    padding: 24px;
+  }
+
+  .admin-heading {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .button-group {
+    gap: 10px;
+  }
+
+  .btn {
+    padding: 11px 16px;
+    font-size: 13px;
+  }
+}
+
+/* Responsive Design for Small Phones (480px and below) */
+@media (max-width: 480px) {
+  .admin-container {
+    padding: 16px;
+  }
+
+  .admin-panel {
+    padding: 20px;
+  }
+
+  .admin-heading {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .current-token-box,
+  .last-token-box {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .token-display {
+    min-height: 50px;
+  }
+
+  .token-code {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .btn {
+    min-width: 100%;
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+
+  .last-token-section {
+    margin-top: 20px;
+    padding-top: 20px;
+  }
+
+  .token-meta {
+    font-size: 12px;
+    margin-top: 10px;
+  }
+}
+
+/* Responsive Design for Extra Small Phones (350px and below - near minimum) */
+@media (max-width: 350px) {
+  .admin-container {
+    padding: 12px;
+  }
+
+  .admin-panel {
+    padding: 16px;
+    border-radius: 6px;
+  }
+
+  .admin-heading {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .current-token-box,
+  .last-token-box {
+    padding: 10px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+  }
+
+  .token-display {
+    min-height: 45px;
+  }
+
+  .token-code {
+    padding: 8px 10px;
+    font-size: 10px;
+    border-radius: 3px;
+  }
+
+  .button-group {
+    margin-bottom: 20px;
+  }
+
+  .btn {
+    padding: 9px 12px;
+    font-size: 11px;
+    min-width: 80px;
+  }
+
+  .btn:hover {
+    transform: none;
+  }
+
+  .token-meta {
+    font-size: 11px;
+    margin-top: 8px;
+  }
+
+  .last-token-section {
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+}
+
+/* ===============================
+   TOKEN BLOCK RE-STYLING
+   =============================== */
+
+/* Current Token Block */
+.current-token-box {
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  padding: 30px 20px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.current-token-box .section-title {
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  color: #94a3b8;
+  margin-bottom: 20px;
+}
+
+.current-token-box .token-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.current-token-box .token-code {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: #22c55e;
+  color: #020617;
+  padding: 18px 28px;
+  border-radius: 14px;
+  min-width: 80px;
+  text-align: center;
+  box-shadow: 0 6px 15px rgba(34, 197, 94, 0.4);
+}
+
+/* Last Generated Token Block */
+.last-token-section {
+  margin-top: 30px;
+}
+
+.last-token-box {
+  margin-top: 12px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.last-token-box .token-code {
+  font-size: 1.6rem;
+  font-weight: 600;
+  background: #020617;
+  color: #22c55e;
+  padding: 12px 20px;
+  border-radius: 10px;
+  min-width: 70px;
+  text-align: center;
+}
+
+/* No token text */
+.no-token {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+}
