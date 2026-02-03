@@ -12,7 +12,9 @@ export default function UserPanel() {
   // 🔥 Fetch initial state on load
   const fetchInitialData = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/tokens/current");
+      const res = await fetch(
+        "https://hospital-token-system-backend.vercel.app/api/tokens/current",
+      );
       const data = await res.json();
       setActiveToken(data.activeToken);
       setUpcomingTokens(data.upcomingTokens);
