@@ -74,8 +74,7 @@ app.use(express.json());
 // Routes
 app.use("/api/tokens", tokenRoutes);
 
-// Health
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.send("Hospital Token System Backend running on Vercel ✅");
 });
 
