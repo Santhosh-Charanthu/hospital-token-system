@@ -58,8 +58,8 @@ module.exports.completeToken = async (req, res) => {
     }
 
     // 🔥 Emit update
-    const io = req.app.get("io");
-    await emitTokenUpdate(io);
+    // const io = req.app.get("io");
+    // await emitTokenUpdate(io);
 
     res.json({
       message: "Token completed successfully",
@@ -106,11 +106,11 @@ module.exports.resetTokens = async (req, res) => {
     await Token.deleteMany({});
 
     // 🔥 Emit empty state
-    const io = req.app.get("io");
-    io.emit("TOKEN_UPDATE", {
-      activeToken: null,
-      upcomingTokens: [],
-    });
+    // const io = req.app.get("io");
+    // io.emit("TOKEN_UPDATE", {
+    //   activeToken: null,
+    //   upcomingTokens: [],
+    // });
 
     res.json({ message: "Tokens reset successfully" });
   } catch (error) {
@@ -141,7 +141,7 @@ exports.confirmIssued = async (req, res) => {
   await Token.findByIdAndUpdate(tokenId, { issued: true });
 
   // ✅ NOW emit update
-  await emitTokenUpdate(req.app.get("io"));
+  // await emitTokenUpdate(req.app.get("io"));
 
   res.json({ success: true });
 };
