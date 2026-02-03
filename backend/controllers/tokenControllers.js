@@ -1,18 +1,18 @@
 const Token = require("../models/Token");
 
-const emitTokenUpdate = async (io) => {
-  const Token = require("../models/Token");
+// const emitTokenUpdate = async (io) => {
+//   const Token = require("../models/Token");
 
-  const activeToken = await Token.findOne({ status: "ACTIVE" });
-  const upcomingTokens = await Token.find({ status: "WAITING" })
-    .sort({ createdAt: 1 })
-    .limit(5);
+//   const activeToken = await Token.findOne({ status: "ACTIVE" });
+//   const upcomingTokens = await Token.find({ status: "WAITING" })
+//     .sort({ createdAt: 1 })
+//     .limit(5);
 
-  io.emit("TOKEN_UPDATE", {
-    activeToken,
-    upcomingTokens,
-  });
-};
+//   io.emit("TOKEN_UPDATE", {
+//     activeToken,
+//     upcomingTokens,
+//   });
+// };
 
 module.exports.generateToken = async (req, res) => {
   try {
