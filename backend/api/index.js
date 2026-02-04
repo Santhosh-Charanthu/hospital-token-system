@@ -11,15 +11,14 @@ const connectDB = require("../config/db");
 const tokenRoutes = require("../routes/tokenRoutes");
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-dotenv.config();
-
 const app = express();
 const server = http.createServer(app);
 
 // 🔥 Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: process.env.FRONTEND_URL || "*",
+    methods: ["GET", "POST"],
   },
 });
 
@@ -38,7 +37,7 @@ app.use("/api/tokens", tokenRoutes);
 
 // Health check
 app.get("/", (req, res) => {
-  res.send("Hospital Token System Backend is running");
+  res.send(process.env.BACKEND_URL);
 });
 
 app.get("/ping", (req, res) => {
