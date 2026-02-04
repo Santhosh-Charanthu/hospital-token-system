@@ -1,26 +1,29 @@
 const Token = require("../models/Token");
 
-// const emitTokenUpdate = async (io) => {
-//   const Token = require("../models/Token");
+const emitTokenUpdate = async (io) => {
+  const Token = require("../models/Token");
 
-//   const activeToken = await Token.findOne({ status: "ACTIVE" });
-//   const upcomingTokens = await Token.find({ status: "WAITING" })
-//     .sort({ createdAt: 1 })
-//     .limit(5);
+  const activeToken = await Token.findOne({ status: "ACTIVE" });
+  const upcomingTokens = await Token.find({ status: "WAITING" })
+    .sort({ createdAt: 1 })
+    .limit(5);
 
-//   io.emit("TOKEN_UPDATE", {
-//     activeToken,
-//     upcomingTokens,
-//   });
-// };
+  io.emit("TOKEN_UPDATE", {
+    activeToken,
+    upcomingTokens,
+  });
+};
 
 module.exports.generateToken = async (req, res) => {
   try {
+    // Get last token number
     const lastToken = await Token.findOne().sort({ tokenNumber: -1 });
     const nextTokenNumber = lastToken ? lastToken.tokenNumber + 1 : 1;
 
+    // Check if an active token already exists
     const activeToken = await Token.findOne({ status: "ACTIVE" });
 
+    // Create new token
     const newToken = new Token({
       tokenNumber: nextTokenNumber,
       status: activeToken ? "WAITING" : "ACTIVE",
@@ -28,6 +31,21 @@ module.exports.generateToken = async (req, res) => {
 
     await newToken.save();
 
+    // 🔥 Fetch updated state for socket emit
+    const updatedActiveToken = await Token.findOne({ status: "ACTIVE" });
+    const upcomingTokens = await Token.find({ status: "WAITING" })
+      .sort({ createdAt: 1 })
+      .limit(5);
+
+    const io = req.app.get("io");
+
+    // 🔥 Emit socket update
+    io.emit("TOKEN_UPDATE", {
+      activeToken: updatedActiveToken,
+      upcomingTokens,
+    });
+
+    // Response
     res.status(201).json({
       message: "Token generated successfully",
       token: newToken,
@@ -58,8 +76,8 @@ module.exports.completeToken = async (req, res) => {
     }
 
     // 🔥 Emit update
-    // const io = req.app.get("io");
-    // await emitTokenUpdate(io);
+    const io = req.app.get("io");
+    await emitTokenUpdate(io);
 
     res.json({
       message: "Token completed successfully",
@@ -106,11 +124,11 @@ module.exports.resetTokens = async (req, res) => {
     await Token.deleteMany({});
 
     // 🔥 Emit empty state
-    // const io = req.app.get("io");
-    // io.emit("TOKEN_UPDATE", {
-    //   activeToken: null,
-    //   upcomingTokens: [],
-    // });
+    const io = req.app.get("io");
+    io.emit("TOKEN_UPDATE", {
+      activeToken: null,
+      upcomingTokens: [],
+    });
 
     res.json({ message: "Tokens reset successfully" });
   } catch (error) {
@@ -141,7 +159,7 @@ exports.confirmIssued = async (req, res) => {
   await Token.findByIdAndUpdate(tokenId, { issued: true });
 
   // ✅ NOW emit update
-  // await emitTokenUpdate(req.app.get("io"));
+  await emitTokenUpdate(req.app.get("io"));
 
   res.json({ success: true });
 };
