@@ -4,6 +4,9 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 const { Server } = require("socket.io");
+const cron = require("node-cron");
+const axios = require("axios");
+const RENDER_URL = `${process.env.BACKEND_URL}/ping`;
 
 const connectDB = require("../config/db");
 const tokenRoutes = require("../routes/tokenRoutes");
@@ -37,6 +40,21 @@ app.use("/api/tokens", tokenRoutes);
 // Health check
 app.get("/", (req, res) => {
   res.send("Hospital Token System Backend is running");
+});
+
+app.get("/ping", (req, res) => {
+  res.send("pong");
+});
+
+cron.schedule("*/14 * * * *", async () => {
+  try {
+    const response = await axios.get(RENDER_URL);
+    console.log(
+      `✅ Self-ping successful: ${response.data} at ${new Date().toISOString()}`,
+    );
+  } catch (error) {
+    console.error("❌ Self-ping failed:", error.message);
+  }
 });
 
 // Socket connection
