@@ -6,7 +6,6 @@ const path = require("path");
 const { Server } = require("socket.io");
 const cron = require("node-cron");
 const axios = require("axios");
-const RENDER_URL = `${process.env.BACKEND_URL}/ping`;
 
 const connectDB = require("../config/db");
 const tokenRoutes = require("../routes/tokenRoutes");
@@ -46,9 +45,11 @@ app.get("/ping", (req, res) => {
   res.send("pong");
 });
 
+const PORT = process.env.PORT || 5000;
+
 cron.schedule("*/14 * * * *", async () => {
   try {
-    const response = await axios.get(RENDER_URL);
+    const response = await axios.get(`${process.env.BACKEND_URL}/ping`);
     console.log(
       `✅ Self-ping successful: ${response.data} at ${new Date().toISOString()}`,
     );
@@ -66,7 +67,6 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
