@@ -1,0 +1,136 @@
+/* Page Background */
+.page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f9ff, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Main Panel */
+.panel {
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* Header */
+.clinic-header {
+  text-align: center;
+}
+
+.clinic-header h1 {
+  font-size: 22px;
+  color: #0369a1;
+  margin-bottom: 4px;
+}
+
+.clinic-header p {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Live Status */
+.live-status {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #15803d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: #22c55e;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Now Serving */
+.now-serving {
+  margin-top: 24px;
+  background: #f0f9ff;
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+}
+
+.label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6b7280;
+}
+
+.token-number {
+  margin-top: 12px;
+  font-size: 64px;
+  font-weight: 700;
+  color: #0369a1;
+}
+
+/* Upcoming Section */
+.upcoming-section {
+  margin-top: 24px;
+}
+
+.upcoming-section h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+
+.upcoming-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.upcoming-token {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #bae6fd;
+  background: #ffffff;
+  color: #0369a1;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.empty {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* Footer */
+.footer {
+  margin-top: 24px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+}
