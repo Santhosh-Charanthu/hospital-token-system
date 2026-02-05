@@ -5,7 +5,7 @@ import io from "socket.io-client";
 import { motion, AnimatePresence } from "framer-motion";
 import "../../styles/UserPanel.css";
 
-const BASE_URL = process.env.BACKEND_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const socket = io(BASE_URL);
 
@@ -15,7 +15,7 @@ export default function UserPanel() {
 
   const fetchInitialData = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/tokens/current`);
+      const res = await fetch(`${BASE_URL}/api/tokens/current`);
       const data = await res.json();
       setActiveToken(data.activeToken);
       setUpcomingTokens(data.upcomingTokens);
