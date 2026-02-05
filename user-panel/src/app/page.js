@@ -103,8 +103,38 @@ export default function UserPanel() {
     };
   }, [socket]);
 
+  const enterFullscreen = () => {
+    const el = document.documentElement;
+
+    if (!document.fullscreenElement) {
+      el.requestFullscreen().catch((err) => {
+        console.error("Fullscreen failed:", err);
+      });
+    }
+  };
+
+  const exitFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key.toLowerCase() === "f") {
+        enterFullscreen();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
-    <div className="screen">
+    <div className="screen" onDoubleClick={enterFullscreen}>
       {/* 🧭 NAVBAR */}
       <header className="navbar">
         <div className="navbar-left">
