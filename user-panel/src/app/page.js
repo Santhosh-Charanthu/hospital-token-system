@@ -116,7 +116,7 @@ export default function UserPanel() {
 
           <div className="clinic-text">
             <h1>HOPE HOMOEOPATHY, Malakpet</h1>
-            <p>OPD Timings: 9:00 AM – 6:00 PM</p>
+            <p>OPD Timings: 10:00 AM – 5:00 PM</p>
           </div>
         </div>
 
