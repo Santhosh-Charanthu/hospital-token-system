@@ -140,10 +140,26 @@
   margin: 0;
 }
 
+.fullscreen-btn {
+  margin-left: 16px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #0369a1;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.fullscreen-btn:hover {
+  background: #f0f9ff;
+}
+
 /* ===============================
    RESPONSIVE (MAX 768px)
    =============================== */
-@media (max-width: 768px) {
+@media (max-width: 960px) {
   .navbar {
     padding: 16px 24px;
     height: auto;

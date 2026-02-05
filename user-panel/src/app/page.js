@@ -9,6 +9,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function UserPanel() {
   const [socket, setSocket] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [serverError, setServerError] = useState(false);
   const [activeToken, setActiveToken] = useState(null);
@@ -103,38 +104,34 @@ export default function UserPanel() {
     };
   }, [socket]);
 
-  const enterFullscreen = () => {
-    const el = document.documentElement;
-
-    if (!document.fullscreenElement) {
-      el.requestFullscreen().catch((err) => {
-        console.error("Fullscreen failed:", err);
-      });
-    }
-  };
-
-  const exitFullscreen = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    } catch (err) {
+      console.error("Fullscreen toggle failed", err);
     }
   };
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key.toLowerCase() === "f") {
-        enterFullscreen();
-      }
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
 
   return (
-    <div className="screen" onDoubleClick={enterFullscreen}>
+    <div className="screen">
       {/* 🧭 NAVBAR */}
       <header className="navbar">
         <div className="navbar-left">
@@ -153,6 +150,9 @@ export default function UserPanel() {
         <div className="navbar-right">
           <span className="live-dot" />
           <span>Live Token Status</span>
+          <button className="fullscreen-btn" onClick={toggleFullscreen}>
+            {isFullscreen ? "Exit Full Screen" : "Full Screen"}
+          </button>
         </div>
       </header>
 
