@@ -1,53 +1,48 @@
-/* Page Background */
-.page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f0f9ff, #ffffff);
+.screen {
+  height: 100vh;
+  width: 100vw;
+  background: radial-gradient(circle at top, #f8fafc, #ffffff);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  color: #0f172a;
   font-family: "Segoe UI", sans-serif;
 }
 
-/* Main Panel */
-.panel {
-  width: 100%;
-  max-width: 460px;
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-}
-
-/* Header */
-.clinic-header {
-  text-align: center;
-}
-
-.clinic-header h1 {
-  font-size: 22px;
-  color: #0369a1;
-  margin-bottom: 4px;
-}
-
-.clinic-header p {
-  font-size: 13px;
-  color: #6b7280;
-}
-
-/* Live Status */
-.live-status {
-  margin-top: 10px;
-  font-size: 13px;
-  color: #15803d;
+/* NAVBAR */
+.navbar {
+  height: 90px;
+  padding: 0 60px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
+  justify-content: space-between;
+  background: linear-gradient(180deg, #ffffff, #f1f5f9cc);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
+.navbar-left h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.navbar-left p {
+  font-size: 0.95rem;
+  color: #475569;
+  margin-top: 4px;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #15803d;
+  font-size: 1rem;
+}
+
+/* LIVE DOT */
+.live-dot {
+  width: 10px;
+  height: 10px;
   background: #22c55e;
   border-radius: 50%;
   animation: pulse 1.5s infinite;
@@ -68,69 +63,223 @@
   }
 }
 
-/* Now Serving */
-.now-serving {
-  margin-top: 24px;
-  background: #f0f9ff;
-  border-radius: 14px;
-  padding: 20px;
+/* MAIN CONTENT */
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
-.label {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #6b7280;
+/* TITLES */
+.title {
+  font-size: clamp(1.8rem, 6vw, 3rem);
+  margin-bottom: 20px;
 }
 
-.token-number {
-  margin-top: 12px;
-  font-size: 64px;
+/* CURRENT TOKEN */
+.current-token {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(3.5rem, 18vw, 8rem);
   font-weight: 700;
-  color: #0369a1;
+  background: #2563eb; /* BLUE (Tailwind blue-600) */
+  color: #ffffff;
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.35);
+  padding: clamp(18px, 6vw, 32px) clamp(40px, 14vw, 90px);
+  border-radius: 20px;
+  margin-bottom: 40px;
+  min-width: 180px;
 }
 
-/* Upcoming Section */
-.upcoming-section {
-  margin-top: 24px;
+/* SUBTITLE */
+.subtitle {
+  font-size: clamp(1.2rem, 5vw, 2rem);
+  margin-bottom: 20px;
 }
 
-.upcoming-section h2 {
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #6b7280;
-  margin-bottom: 10px;
-}
-
-.upcoming-list {
+/* UPCOMING TOKENS */
+.upcoming {
   display: flex;
-  gap: 10px;
+  gap: 16px;
+  justify-content: center;
   flex-wrap: wrap;
 }
 
-.upcoming-token {
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 1px solid #bae6fd;
-  background: #ffffff;
-  color: #0369a1;
-  font-weight: 500;
-  font-size: 14px;
+.token {
+  font-size: clamp(1.5rem, 6vw, 2.5rem);
+  font-weight: 600;
+  background: #e2e8f0;
+  color: #0f172a;
+  padding: 14px 26px;
+  border-radius: 14px;
+  min-width: 64px;
+  box-shadow: 0 6px 15px rgba(15, 23, 42, 0.12);
 }
 
-.empty {
-  font-size: 13px;
-  color: #9ca3af;
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-/* Footer */
-.footer {
-  margin-top: 24px;
-  border-top: 1px solid #e5e7eb;
-  padding-top: 14px;
+.navbar-logo {
+  width: 108px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.clinic-text h1 {
+  margin: 0;
+}
+
+.clinic-text p {
+  margin: 0;
+}
+
+/* ===============================
+   RESPONSIVE (MAX 768px)
+   =============================== */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 16px 24px;
+    height: auto;
+    flex-direction: column;
+    align-items: center; /* 🔥 center items */
+    justify-content: center;
+    gap: 8px;
+    text-align: center; /* 🔥 center text */
+  }
+
+  .navbar-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 🔥 center content */
+  }
+
+  .navbar-left h1 {
+    text-align: center;
+  }
+
+  .navbar-left p {
+    text-align: center;
+  }
+
+  .navbar-right {
+    justify-content: center; /* 🔥 center live status */
+    font-size: 0.9rem;
+  }
+
+  .container {
+    padding: 20px;
+  }
+}
+
+/* ===============================
+   RESPONSIVE (MAX 480px)
+   =============================== */
+@media (max-width: 480px) {
+  .navbar-left h1 {
+    text-align: center;
+    font-size: 1.3rem;
+  }
+
+  .navbar-left p {
+    text-align: center;
+    font-size: 0.8rem;
+  }
+
+  .navbar-right {
+    text-align: center;
+    font-size: 0.85rem;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .current-token {
+    font-size: 4.5rem;
+    padding: 18px 40px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+  }
+
+  .token {
+    font-size: 1.4rem;
+    padding: 12px 18px;
+    border-radius: 12px;
+  }
+}
+
+.error-banner {
+  width: 100%;
   text-align: center;
-  font-size: 12px;
-  color: #6b7280;
+  padding: 10px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: 1px solid #fecaca;
+}
+
+/* ===============================
+   RESPONSIVE (MAX 300px)
+   =============================== */
+@media (max-width: 300px) {
+  .navbar {
+    padding: 10px 12px;
+  }
+
+  .navbar-left h1 {
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .navbar-left p {
+    text-align: center;
+    font-size: 0.7rem;
+  }
+
+  .navbar-right {
+    text-align: center;
+    font-size: 0.75rem;
+    gap: 6px;
+  }
+
+  .container {
+    padding: 12px;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .current-token {
+    font-size: 3.2rem;
+    padding: 14px 28px;
+    border-radius: 14px;
+    min-width: unset;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .upcoming {
+    gap: 10px;
+  }
+
+  .token {
+    font-size: 1.2rem;
+    padding: 10px 14px;
+    border-radius: 10px;
+  }
 }
