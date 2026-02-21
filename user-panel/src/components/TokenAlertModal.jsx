@@ -5,6 +5,8 @@ import { getFirebaseMessaging } from "../app/firebase";
 import { getToken } from "firebase/messaging";
 import "../../styles/TokenAlertModal.css";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 export default function TokenAlertModal({ open, onClose, activeToken }) {
   const [tokenNumber, setTokenNumber] = useState("");
   const [loading, setLoading] = useState(false);
