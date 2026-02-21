@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Token = require("../models/Token");
+const TokenAlert = require("../models/TokenAlert");
 const tokenControllers = require("../controllers/tokenControllers");
 
 /**
@@ -34,5 +35,7 @@ router.get("/last-generated", tokenControllers.lastGeneratedToken);
 router.post("/reset", tokenControllers.resetTokens);
 
 router.post("/confirm-issued", tokenControllers.confirmIssued);
+
+router.post("/token-alert", tokenControllers.tokenAlert);
 
 module.exports = router;

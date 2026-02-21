@@ -299,3 +299,77 @@
     border-radius: 10px;
   }
 }
+
+/* =========================
+   FLOATING ACTION BUTTONS
+   ========================= */
+
+.fab-container {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 9999;
+}
+
+/* Base button */
+.fab {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: white;
+  font-size: 20px;
+
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.35);
+
+  transition: all 0.25s ease;
+}
+
+/* Hover animation */
+.fab:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.55),
+    0 4px 10px rgba(0, 0, 0, 0.45);
+}
+
+/* Click animation */
+.fab:active {
+  transform: scale(0.92);
+}
+
+/* Bell button */
+.fab-bell {
+  background: linear-gradient(145deg, #2563eb, #1d4ed8);
+}
+
+/* Fullscreen button */
+.fab-fullscreen {
+  background: linear-gradient(145deg, #22c55e, #16a34a);
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .fab {
+    width: 50px;
+    height: 50px;
+  }
+
+  .fab-container {
+    right: 16px;
+    bottom: 16px;
+    gap: 12px;
+  }
+}

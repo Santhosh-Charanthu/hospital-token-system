@@ -1,4 +1,6 @@
 const Token = require("../models/Token");
+const TokenAlert = require("../models/TokenAlert");
+const admin = require("../config/firebaseAdmin");
 
 const emitTokenUpdate = async (io) => {
   const Token = require("../models/Token");
@@ -55,7 +57,42 @@ module.exports.generateToken = async (req, res) => {
   }
 };
 
+// module.exports.completeToken = async (req, res) => {
+//   try {
+//     const activeToken = await Token.findOne({ status: "ACTIVE" });
+
+//     if (!activeToken) {
+//       return res.status(400).json({ message: "No active token found" });
+//     }
+
+//     activeToken.status = "COMPLETED";
+//     await activeToken.save();
+
+//     const nextToken = await Token.findOne({ status: "WAITING" }).sort({
+//       createdAt: 1,
+//     });
+
+//     if (nextToken) {
+//       nextToken.status = "ACTIVE";
+//       await nextToken.save();
+//     }
+
+//     // 🔥 Emit update
+//     const io = req.app.get("io");
+//     await emitTokenUpdate(io);
+
+//     res.json({
+//       message: "Token completed successfully",
+//       completedToken: activeToken,
+//       activeToken: nextToken || null,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 module.exports.completeToken = async (req, res) => {
+  console.log("🔥 COMPLETE TOKEN CONTROLLER HIT 🔥");
   try {
     const activeToken = await Token.findOne({ status: "ACTIVE" });
 
@@ -63,9 +100,11 @@ module.exports.completeToken = async (req, res) => {
       return res.status(400).json({ message: "No active token found" });
     }
 
+    // 1️⃣ complete current
     activeToken.status = "COMPLETED";
     await activeToken.save();
 
+    // 2️⃣ activate next
     const nextToken = await Token.findOne({ status: "WAITING" }).sort({
       createdAt: 1,
     });
@@ -73,9 +112,89 @@ module.exports.completeToken = async (req, res) => {
     if (nextToken) {
       nextToken.status = "ACTIVE";
       await nextToken.save();
+
+      /* =======================================================
+         🔔 FIREBASE ALERT LOGIC STARTS HERE
+      ======================================================= */
+
+      const currentTokenNumber = nextToken.tokenNumber;
+      console.log("New active token:", currentTokenNumber);
+
+      // we check 4 reminder stages
+      const stages = [
+        {
+          diff: 3,
+          stage: 1,
+          message: "Your turn is approaching. Please be ready.",
+        },
+        {
+          diff: 2,
+          stage: 2,
+          message: "Only 2 patients ahead. Please come near OP room.",
+        },
+        {
+          diff: 1,
+          stage: 3,
+          message: "You are next. Kindly wait outside the doctor's room.",
+        },
+        {
+          diff: 0,
+          stage: 4,
+          message: "It is your turn now. Please enter the consultation room.",
+        },
+      ];
+
+      for (const s of stages) {
+        const targetToken = currentTokenNumber + s.diff;
+
+        const alerts = await TokenAlert.find({
+          patientTokenNumber: targetToken,
+          stage: { $lt: s.stage },
+        });
+
+        console.log(`Stage ${s.stage} alerts:`, alerts.length);
+
+        for (const alert of alerts) {
+          try {
+            const response = await admin.messaging().send({
+              token: alert.deviceToken,
+
+              webpush: {
+                notification: {
+                  title: "Hospital Token Update",
+                  body: `Token ${alert.patientTokenNumber}: ${s.message}`,
+                  icon: "https://your-domain.com/logo.png",
+                  badge: "https://your-domain.com/logo.png",
+                  tag: `token-${alert.patientTokenNumber}`,
+                },
+
+                data: {
+                  tokenNumber: String(alert.patientTokenNumber),
+                  stage: String(s.stage),
+                },
+
+                headers: {
+                  Urgency: "high",
+                  TTL: "0",
+                },
+              },
+            });
+
+            console.log("Notification sent:", response);
+
+            // update stage
+            alert.stage = s.stage;
+            await alert.save();
+          } catch (err) {
+            console.log("FCM ERROR:", err.message);
+          }
+        }
+      }
     }
 
-    // 🔥 Emit update
+    /* ======================================================= */
+
+    // socket update (this stays AFTER notification)
     const io = req.app.get("io");
     await emitTokenUpdate(io);
 
@@ -136,22 +255,6 @@ module.exports.resetTokens = async (req, res) => {
   }
 };
 
-// // controller
-// exports.confirmIssued = async (req, res) => {
-//   const { tokenId } = req.body;
-
-//   // mark token as issued
-//   await Token.findByIdAndUpdate(tokenId, { issued: true });
-
-//   const activeToken = await Token.findOne({ status: "active" });
-//   const upcomingTokens = await Token.find({ status: "pending" });
-
-//   // 🔥 EMIT ONLY HERE
-//   io.emit("TOKEN_UPDATE", { activeToken, upcomingTokens });
-
-//   res.json({ success: true });
-// };
-
 exports.confirmIssued = async (req, res) => {
   const { tokenId } = req.body;
 
@@ -162,4 +265,28 @@ exports.confirmIssued = async (req, res) => {
   await emitTokenUpdate(req.app.get("io"));
 
   res.json({ success: true });
+};
+
+module.exports.tokenAlert = async (req, res) => {
+  try {
+    const { deviceToken, tokenNumber } = req.body;
+
+    console.log(deviceToken);
+
+    if (!deviceToken || !tokenNumber) {
+      return res.status(400).json({ message: "Missing data" });
+    }
+
+    // remove previous subscriptions for this device
+    await TokenAlert.deleteMany({ deviceToken });
+
+    await TokenAlert.create({
+      deviceToken,
+      patientTokenNumber: tokenNumber,
+    });
+
+    res.json({ success: true, message: "Alert subscribed" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };

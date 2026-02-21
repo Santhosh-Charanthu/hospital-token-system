@@ -2,13 +2,18 @@
 
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
+import { onMessage } from "firebase/messaging";
+import { getFirebaseMessaging } from "./firebase";
 import { motion, AnimatePresence } from "framer-motion";
+import TokenAlertModal from "../components/TokenAlertModal";
+import { Bell } from "lucide-react";
 import "../../styles/UserPanel.css";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function UserPanel() {
   const [socket, setSocket] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [serverError, setServerError] = useState(false);
@@ -130,6 +135,51 @@ export default function UserPanel() {
     };
   }, []);
 
+  useEffect(() => {
+    let unsubscribe;
+
+    const setupForegroundListener = async () => {
+      const messaging = await getFirebaseMessaging();
+      if (!messaging) return;
+
+      unsubscribe = onMessage(messaging, (payload) => {
+        console.log("Foreground notification received:", payload);
+
+        // show notification when site is open
+        if (Notification.permission === "granted") {
+          new Notification(payload.notification.title, {
+            body: payload.notification.body,
+            icon: "/logo.png",
+          });
+        }
+      });
+    };
+
+    setupForegroundListener();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
+
+  // async function requestPerimission() {
+  //   const permission = await Notification.requestPermission();
+  //   if (permission === "granted") {
+  //     const messaging = await getFirebaseMessaging();
+  //     const token = await getToken(messaging, {
+  //       vapidKey:
+  //         "BPax7CFWCKoKcy2t-ywwPge0uNO0V38v6-y0DESVYVrSPrTGYvs_LaKMJBaPsDfBoAIUN-wuuP2ZGtQSIo7uDzc",
+  //     });
+  //     console.log("Token Gen", token);
+  //   } else if (permission == "denied") {
+  //     alert("You denied for the notification");
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   requestPerimission();
+  // }, []);
+
   return (
     <div className="screen">
       {/* 🧭 NAVBAR */}
@@ -139,8 +189,7 @@ export default function UserPanel() {
             src="/Hospital-logo.jpg"
             alt="Hope Homoeopathy Logo"
             className="navbar-logo"
-          />
-
+          />{" "}
           <div className="clinic-text">
             <h1>HOPE HOMOEOPATHY, Malakpet</h1>
             <p>OPD Timings: 10:00 AM – 5:00 PM</p>
@@ -150,11 +199,13 @@ export default function UserPanel() {
         <div className="navbar-right">
           <span className="live-dot" />
           <span>Live Token Status</span>
-          <button className="fullscreen-btn" onClick={toggleFullscreen}>
-            {isFullscreen ? "Exit Full Screen" : "Full Screen"}
-          </button>
         </div>
       </header>
+      <TokenAlertModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        activeToken={activeToken}
+      />
 
       {(!isOnline || serverError) && (
         <div className="error-banner">
@@ -204,6 +255,26 @@ export default function UserPanel() {
           </AnimatePresence>
         </div>
       </main>
+      {/* 🔘 FLOATING ACTION BUTTONS */}
+      <div className="fab-container">
+        {/* Notification */}
+        <button
+          className="fab fab-bell"
+          onClick={() => setShowModal(true)}
+          aria-label="Enable token alerts"
+        >
+          <Bell size={26} />
+        </button>
+
+        {/* Fullscreen */}
+        <button
+          className="fab fab-fullscreen"
+          onClick={toggleFullscreen}
+          aria-label="Toggle fullscreen"
+        >
+          {isFullscreen ? "⤫" : "⛶"}
+        </button>
+      </div>
     </div>
   );
 }

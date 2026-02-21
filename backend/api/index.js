@@ -46,7 +46,7 @@ app.get("/ping", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-cron.schedule("*/14 * * * *", async () => {
+cron.schedule("*/10 * * * *", async () => {
   try {
     const response = await axios.get(`${process.env.BACKEND_URL}/ping`);
     console.log(
