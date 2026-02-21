@@ -35,7 +35,7 @@ messaging.onBackgroundMessage(async (payload) => {
 
   await self.registration.showNotification(payload.notification.title, {
     body: payload.notification.body,
-    icon: "/logo.png",
+    icon: "/notification-icon.png",
     tag: `token-${tokenNumber}`,
     renotify: true,
   });

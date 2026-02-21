@@ -1,6 +1,7 @@
 const Token = require("../models/Token");
 const TokenAlert = require("../models/TokenAlert");
 const admin = require("../config/firebaseAdmin");
+const FRONTEND_URL = process.env.FRONTEND_URL;
 
 const emitTokenUpdate = async (io) => {
   const Token = require("../models/Token");
@@ -161,7 +162,7 @@ module.exports.completeToken = async (req, res) => {
                 notification: {
                   title: "Hospital Token Update",
                   body: `Token ${alert.patientTokenNumber}: ${s.message}`,
-                  icon: "https://your-domain.com/logo.png",
+                  icon: `${FRONTEND_URL}/notification-icon.png`,
                   badge: "https://your-domain.com/logo.png",
                   tag: `token-${alert.patientTokenNumber}`,
                 },
