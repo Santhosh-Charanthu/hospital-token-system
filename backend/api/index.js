@@ -12,14 +12,17 @@ const tokenRoutes = require("../routes/tokenRoutes");
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
+app.set("trust proxy", 1);
 const server = http.createServer(app);
 
 // 🔥 Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "*",
+    origin: ["http://localhost:3000", process.env.FRONTEND_URL],
     methods: ["GET", "POST"],
+    credentials: true,
   },
+  transports: ["websocket", "polling"],
 });
 
 // Make io accessible everywhere

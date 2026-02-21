@@ -45,10 +45,10 @@ export default function UserPanel() {
 
   useEffect(() => {
     const s = io(BASE_URL, {
+      withCredentials: true,
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 2000,
-      transports: ["websocket"],
     });
 
     setSocket(s);
