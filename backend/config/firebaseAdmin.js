@@ -1,7 +1,20 @@
-var admin = require("firebase-admin");
+// var admin = require("firebase-admin");
 
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_KEY);
-serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+// // var serviceAccount = require("../config/firebaseServiceKey.json");
+
+// const serviceAccount = require("/etc/secrets/firebaseServiceKey.json");
+
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+// });
+
+// module.exports = admin;
+
+const admin = require("firebase-admin");
+
+// Read the secret file created by Render
+const serviceAccount = require("/etc/secrets/firebaseServiceKey.json");
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
