@@ -257,16 +257,18 @@ export default function UserPanel() {
       </main>
       {/* 🔘 FLOATING ACTION BUTTONS */}
       <div className="fab-container">
-        {/* Notification */}
-        <button
-          className="fab fab-bell"
-          onClick={() => setShowModal(true)}
-          aria-label="Enable token alerts"
-        >
-          <Bell size={26} />
-        </button>
+        {/* 🔔 Show bell ONLY when NOT fullscreen */}
+        {!isFullscreen && (
+          <button
+            className="fab fab-bell"
+            onClick={() => setShowModal(true)}
+            aria-label="Enable token alerts"
+          >
+            <Bell size={26} />
+          </button>
+        )}
 
-        {/* Fullscreen */}
+        {/* Fullscreen button always visible */}
         <button
           className="fab fab-fullscreen"
           onClick={toggleFullscreen}
