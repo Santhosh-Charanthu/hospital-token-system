@@ -17,21 +17,9 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// messaging.onBackgroundMessage((payload) => {
-//   console.log("Background message:", payload);
-
-//   self.registration.showNotification(payload.notification.title, {
-//     body: payload.notification.body,
-//     icon: "/logo.png",
-//     data: payload.data,
-//   });
-// });
-
 const latestStages = {}; // memory cache
 
 messaging.onBackgroundMessage(async (payload) => {
-  console.log("Background message:", payload);
-
   const tokenNumber = payload.data?.tokenNumber;
   const stage = Number(payload.data?.stage || 0);
 

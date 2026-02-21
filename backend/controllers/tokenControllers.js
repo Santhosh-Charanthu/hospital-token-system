@@ -92,7 +92,6 @@ module.exports.generateToken = async (req, res) => {
 // };
 
 module.exports.completeToken = async (req, res) => {
-  console.log("🔥 COMPLETE TOKEN CONTROLLER HIT 🔥");
   try {
     const activeToken = await Token.findOne({ status: "ACTIVE" });
 
@@ -118,7 +117,6 @@ module.exports.completeToken = async (req, res) => {
       ======================================================= */
 
       const currentTokenNumber = nextToken.tokenNumber;
-      console.log("New active token:", currentTokenNumber);
 
       // we check 4 reminder stages
       const stages = [

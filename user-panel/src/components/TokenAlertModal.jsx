@@ -55,8 +55,6 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
         serviceWorkerRegistration: registration,
       });
 
-      console.log(deviceToken);
-
       // Send to backend
       const res = await fetch(`${BASE_URL}/api/tokens/token-alert`, {
         method: "POST",
@@ -68,8 +66,6 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
       });
 
       const data = await res.json();
-
-      console.log(data);
 
       if (data.success) {
         setMessage("You will be notified before your turn.");
