@@ -56,7 +56,7 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
       console.log(deviceToken);
 
       // Send to backend
-      const res = await fetch("http://localhost:5000/api/tokens/token-alert", {
+      const res = await fetch(`${BASE_URL}/api/tokens/token-alert`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
