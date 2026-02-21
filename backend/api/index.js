@@ -12,34 +12,13 @@ const tokenRoutes = require("../routes/tokenRoutes");
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
-app.set("trust proxy", 1);
 const server = http.createServer(app);
 
 // 🔥 Socket.IO setup
-// const io = new Server(server, {
-//   cors: {
-//     origin: ["http://localhost:3000", process.env.FRONTEND_URL],
-//     methods: ["GET", "POST"],
-//     credentials: true,
-//   },
-//   transports: ["websocket", "polling"],
-// });
-
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL || "*",
     methods: ["GET", "POST"],
-    credentials: true,
-  },
-
-  allowEIO3: true,
-  pingTimeout: 60000,
-  pingInterval: 25000,
-  transports: ["websocket"],
-
-  connectionStateRecovery: {
-    maxDisconnectionDuration: 2 * 60 * 1000,
-    skipMiddlewares: true,
   },
 });
 
@@ -85,10 +64,6 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("🔴 Client disconnected:", socket.id);
   });
-});
-
-io.engine.on("connection_error", (err) => {
-  console.log("SOCKET ERROR:", err.code, err.message, err.context);
 });
 
 server.listen(PORT, () => {
