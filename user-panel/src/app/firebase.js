@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { getApp, getApps, initializeApp } from "firebase/app";
 import { getMessaging, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
@@ -12,12 +12,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
 export const getFirebaseMessaging = async () => {
-  if (typeof window === "undefined") return null;
-
   const supported = await isSupported();
-  if (!supported) return null;
-
+  if (!supported) throw new Error("FCM not supported");
   return getMessaging(app);
 };

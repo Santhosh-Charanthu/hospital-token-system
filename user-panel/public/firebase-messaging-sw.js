@@ -22,19 +22,19 @@ const latestStages = {}; // memory cache
 messaging.onBackgroundMessage(async (payload) => {
   const tokenNumber = payload.data?.tokenNumber;
   const stage = Number(payload.data?.stage || 0);
+  const body = payload.data?.body || payload.notification?.body || "";
+  const title =
+    payload.data?.title ||
+    payload.notification?.title ||
+    "Hospital Token Update";
 
   if (!tokenNumber) return;
 
-  // If we already showed a newer stage → ignore old notification
-  if (latestStages[tokenNumber] && latestStages[tokenNumber] >= stage) {
-    console.log("Ignored outdated notification");
-    return;
-  }
-
+  if (latestStages[tokenNumber] && latestStages[tokenNumber] >= stage) return;
   latestStages[tokenNumber] = stage;
 
-  await self.registration.showNotification(payload.notification.title, {
-    body: payload.notification.body,
+  await self.registration.showNotification(title, {
+    body,
     icon: "/notification-icon.png",
     tag: `token-${tokenNumber}`,
     renotify: true,
