@@ -19,24 +19,57 @@ const messaging = firebase.messaging();
 
 const latestStages = {}; // memory cache
 
+// messaging.onBackgroundMessage(async (payload) => {
+//   const tokenNumber = payload.data?.tokenNumber;
+//   const stage = Number(payload.data?.stage || 0);
+
+//   if (!tokenNumber) return;
+
+//   // If we already showed a newer stage → ignore old notification
+//   if (latestStages[tokenNumber] && latestStages[tokenNumber] >= stage) {
+//     console.log("Ignored outdated notification");
+//     return;
+//   }
+
+//   latestStages[tokenNumber] = stage;
+
+//   await self.registration.showNotification(payload.notification.title, {
+//     body: payload.notification.body,
+//     icon: "/notification-icon.png",
+//     tag: `token-${tokenNumber}`,
+//     renotify: true,
+//   });
+// });
+
 messaging.onBackgroundMessage(async (payload) => {
+  console.log("Background message received:", payload);
+
   const tokenNumber = payload.data?.tokenNumber;
   const stage = Number(payload.data?.stage || 0);
 
   if (!tokenNumber) return;
 
-  // If we already showed a newer stage → ignore old notification
   if (latestStages[tokenNumber] && latestStages[tokenNumber] >= stage) {
-    console.log("Ignored outdated notification");
     return;
   }
 
   latestStages[tokenNumber] = stage;
 
-  await self.registration.showNotification(payload.notification.title, {
-    body: payload.notification.body,
+  // 🛡️ DEFENSIVE CHECK: Fallback if payload.notification is missing
+  const notificationTitle =
+    payload.notification?.title || payload.data?.title || "Hospital Update";
+  const notificationBody =
+    payload.notification?.body ||
+    payload.data?.body ||
+    "New token status available.";
+
+  await self.registration.showNotification(notificationTitle, {
+    body: notificationBody,
     icon: "/notification-icon.png",
     tag: `token-${tokenNumber}`,
     renotify: true,
+    // Add this for mobile vibration/sound
+    vibrate: [200, 100, 200],
+    data: { tokenNumber },
   });
 });

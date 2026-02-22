@@ -158,24 +158,31 @@ module.exports.completeToken = async (req, res) => {
             const response = await admin.messaging().send({
               token: alert.deviceToken,
 
+              // 1️⃣ Move core notification info to the TOP LEVEL
+              // This is what mobile devices (and iOS PWAs) look for first.
+              notification: {
+                title: "Hospital Token Update",
+                body: `Token ${alert.patientTokenNumber}: ${s.message}`,
+              },
+
+              // 2️⃣ Keep Webpush for browser-specific UI (icons, badges, etc.)
               webpush: {
                 notification: {
-                  title: "Hospital Token Update",
-                  body: `Token ${alert.patientTokenNumber}: ${s.message}`,
                   icon: `${FRONTEND_URL}/notification-icon.png`,
                   badge: "https://your-domain.com/logo.png",
-                  tag: `token-${alert.patientTokenNumber}`,
+                  tag: `token-${alert.patientTokenNumber}`, // Prevents duplicate notifications
+                  requireInteraction: true, // Good for hospital alerts
                 },
-
-                data: {
-                  tokenNumber: String(alert.patientTokenNumber),
-                  stage: String(s.stage),
-                },
-
                 headers: {
                   Urgency: "high",
                   TTL: "0",
                 },
+              },
+
+              // 3️⃣ Top-level Data (Always good for app logic)
+              data: {
+                tokenNumber: String(alert.patientTokenNumber),
+                stage: String(s.stage),
               },
             });
 
