@@ -42,34 +42,28 @@ const latestStages = {}; // memory cache
 // });
 
 messaging.onBackgroundMessage(async (payload) => {
-  console.log("Background message received:", payload);
+  console.log("Received background message", payload);
 
-  const tokenNumber = payload.data?.tokenNumber;
-  const stage = Number(payload.data?.stage || 0);
+  // Pull from data because we removed the root notification object
+  const { title, body, tokenNumber, stage } = payload.data || {};
+  const currentStage = Number(stage || 0);
 
   if (!tokenNumber) return;
 
-  if (latestStages[tokenNumber] && latestStages[tokenNumber] >= stage) {
+  // Your logic to prevent outdated notifications
+  if (latestStages[tokenNumber] && latestStages[tokenNumber] >= currentStage) {
     return;
   }
+  latestStages[tokenNumber] = currentStage;
 
-  latestStages[tokenNumber] = stage;
-
-  // 🛡️ DEFENSIVE CHECK: Fallback if payload.notification is missing
-  const notificationTitle =
-    payload.notification?.title || payload.data?.title || "Hospital Update";
-  const notificationBody =
-    payload.notification?.body ||
-    payload.data?.body ||
-    "New token status available.";
-
-  await self.registration.showNotification(notificationTitle, {
-    body: notificationBody,
+  // Manually trigger the notification UI
+  return self.registration.showNotification(title || "Hospital Update", {
+    body: body || "Your token status has changed.",
     icon: "/notification-icon.png",
-    tag: `token-${tokenNumber}`,
+    tag: `token-${tokenNumber}`, // This replaces the old notification of the same token
     renotify: true,
-    // Add this for mobile vibration/sound
     vibrate: [200, 100, 200],
+    requireInteraction: true,
     data: { tokenNumber },
   });
 });
