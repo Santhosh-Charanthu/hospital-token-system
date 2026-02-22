@@ -5,6 +5,10 @@ importScripts(
   "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js",
 );
 
+self.addEventListener("push", function (event) {
+  console.log("Push received:", event);
+});
+
 firebase.initializeApp({
   apiKey: "AIzaSyCiboh5YtIxPy-YqzJkafV2mFCqNoFjaR0",
   authDomain: "hospital-token-system-cccb1.firebaseapp.com",
@@ -17,26 +21,19 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-const latestStages = {}; // memory cache
+messaging.onBackgroundMessage(function (payload) {
+  console.log("Received background message ", payload);
 
-messaging.onBackgroundMessage(async (payload) => {
-  const tokenNumber = payload.data?.tokenNumber;
-  const stage = Number(payload.data?.stage || 0);
-  const body = payload.data?.body || payload.notification?.body || "";
-  const title =
-    payload.data?.title ||
-    payload.notification?.title ||
-    "Hospital Token Update";
-
-  if (!tokenNumber) return;
-
-  if (latestStages[tokenNumber] && latestStages[tokenNumber] >= stage) return;
-  latestStages[tokenNumber] = stage;
-
-  await self.registration.showNotification(title, {
-    body,
-    icon: "/notification-icon.png",
-    tag: `token-${tokenNumber}`,
-    renotify: true,
+  self.registration.showNotification(payload.notification.title, {
+    body: payload.notification.body,
+    icon: payload.notification.icon,
+    badge: payload.notification.badge,
+    data: payload.data,
   });
+});
+
+self.addEventListener("notificationclick", function (event) {
+  event.notification.close();
+
+  event.waitUntil(clients.openWindow(event.notification.data?.url || "/"));
 });

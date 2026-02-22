@@ -157,27 +157,28 @@ module.exports.completeToken = async (req, res) => {
           try {
             const response = await admin.messaging().send({
               token: alert.deviceToken,
-              notification: {
-                // ← add top-level notification
-                title: "Hospital Token Update",
-                body: `Token ${alert.patientTokenNumber}: ${s.message}`,
-              },
+
               webpush: {
+                headers: {
+                  Urgency: "high",
+                  TTL: "86400",
+                },
+
                 notification: {
                   title: "Hospital Token Update",
                   body: `Token ${alert.patientTokenNumber}: ${s.message}`,
                   icon: `${FRONTEND_URL}/notification-icon.png`,
+                  badge: `${FRONTEND_URL}/notification-icon.png`,
                   tag: `token-${alert.patientTokenNumber}`,
+                  requireInteraction: true,
+                  vibrate: [300, 150, 300],
+                  renotify: true,
                 },
+
                 data: {
+                  url: `/live-status?token=${alert.patientTokenNumber}`,
                   tokenNumber: String(alert.patientTokenNumber),
                   stage: String(s.stage),
-                  title: "Hospital Token Update",
-                  body: `Token ${alert.patientTokenNumber}: ${s.message}`,
-                },
-                headers: {
-                  Urgency: "high",
-                  TTL: "86400",
                 },
               },
             });
