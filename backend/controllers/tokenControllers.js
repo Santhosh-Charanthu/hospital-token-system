@@ -157,21 +157,24 @@ module.exports.completeToken = async (req, res) => {
           try {
             const response = await admin.messaging().send({
               token: alert.deviceToken,
-              // 1️⃣ Remove the top-level 'notification' object to stop double-pops
-              // 2️⃣ Put everything in 'data' so the Service Worker handles the UI
-              data: {
-                title: "Hospital Token Update",
-                body: `Token ${alert.patientTokenNumber}: ${s.message}`,
-                tokenNumber: String(alert.patientTokenNumber),
-                stage: String(s.stage),
-              },
-              // 3️⃣ Keep high priority so mobile wakes up
-              android: {
-                priority: "high",
-              },
+
               webpush: {
+                notification: {
+                  title: "Hospital Token Update",
+                  body: `Token ${alert.patientTokenNumber}: ${s.message}`,
+                  icon: `${FRONTEND_URL}/notification-icon.png`,
+                  badge: "https://your-domain.com/logo.png",
+                  tag: `token-${alert.patientTokenNumber}`,
+                },
+
+                data: {
+                  tokenNumber: String(alert.patientTokenNumber),
+                  stage: String(s.stage),
+                },
+
                 headers: {
                   Urgency: "high",
+                  TTL: "0",
                 },
               },
             });

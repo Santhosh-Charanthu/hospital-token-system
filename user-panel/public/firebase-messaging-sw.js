@@ -19,51 +19,24 @@ const messaging = firebase.messaging();
 
 const latestStages = {}; // memory cache
 
-// messaging.onBackgroundMessage(async (payload) => {
-//   const tokenNumber = payload.data?.tokenNumber;
-//   const stage = Number(payload.data?.stage || 0);
-
-//   if (!tokenNumber) return;
-
-//   // If we already showed a newer stage → ignore old notification
-//   if (latestStages[tokenNumber] && latestStages[tokenNumber] >= stage) {
-//     console.log("Ignored outdated notification");
-//     return;
-//   }
-
-//   latestStages[tokenNumber] = stage;
-
-//   await self.registration.showNotification(payload.notification.title, {
-//     body: payload.notification.body,
-//     icon: "/notification-icon.png",
-//     tag: `token-${tokenNumber}`,
-//     renotify: true,
-//   });
-// });
-
 messaging.onBackgroundMessage(async (payload) => {
-  console.log("Received background message", payload);
-
-  // Pull from data because we removed the root notification object
-  const { title, body, tokenNumber, stage } = payload.data || {};
-  const currentStage = Number(stage || 0);
+  const tokenNumber = payload.data?.tokenNumber;
+  const stage = Number(payload.data?.stage || 0);
 
   if (!tokenNumber) return;
 
-  // Your logic to prevent outdated notifications
-  if (latestStages[tokenNumber] && latestStages[tokenNumber] >= currentStage) {
+  // If we already showed a newer stage → ignore old notification
+  if (latestStages[tokenNumber] && latestStages[tokenNumber] >= stage) {
+    console.log("Ignored outdated notification");
     return;
   }
-  latestStages[tokenNumber] = currentStage;
 
-  // Manually trigger the notification UI
-  return self.registration.showNotification(title || "Hospital Update", {
-    body: body || "Your token status has changed.",
+  latestStages[tokenNumber] = stage;
+
+  await self.registration.showNotification(payload.notification.title, {
+    body: payload.notification.body,
     icon: "/notification-icon.png",
-    tag: `token-${tokenNumber}`, // This replaces the old notification of the same token
+    tag: `token-${tokenNumber}`,
     renotify: true,
-    vibrate: [200, 100, 200],
-    requireInteraction: true,
-    data: { tokenNumber },
   });
 });
