@@ -164,21 +164,12 @@ module.exports.completeToken = async (req, res) => {
                   TTL: "86400",
                 },
 
-                notification: {
+                data: {
                   title: "Hospital Token Update",
                   body: `Token ${alert.patientTokenNumber}: ${s.message}`,
-                  icon: `${FRONTEND_URL}/notification-icon.png`,
-                  badge: `${FRONTEND_URL}/notification-icon.png`,
-                  tag: `token-${alert.patientTokenNumber}`,
-                  requireInteraction: true,
-                  vibrate: [300, 150, 300],
-                  renotify: true,
-                },
-
-                data: {
-                  url: `/live-status?token=${alert.patientTokenNumber}`,
                   tokenNumber: String(alert.patientTokenNumber),
                   stage: String(s.stage),
+                  url: "/", // important for click open
                 },
               },
             });
@@ -274,7 +265,7 @@ module.exports.tokenAlert = async (req, res) => {
   try {
     const { deviceToken, tokenNumber } = req.body;
 
-    console.log(deviceToken);
+    console.log("DEVICE TOKEN RECEIVED:", deviceToken);
 
     if (!deviceToken || !tokenNumber) {
       return res.status(400).json({ message: "Missing data" });

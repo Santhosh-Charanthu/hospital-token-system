@@ -144,14 +144,6 @@ export default function UserPanel() {
 
       unsubscribe = onMessage(messaging, (payload) => {
         console.log("Foreground notification received:", payload);
-
-        // show notification when site is open
-        if (Notification.permission === "granted") {
-          new Notification(payload.notification.title, {
-            body: payload.notification.body,
-            icon: "/notification-icon.png",
-          });
-        }
       });
     };
 

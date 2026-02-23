@@ -1,13 +1,9 @@
 importScripts(
-  "https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js",
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
 );
 importScripts(
-  "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js",
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js",
 );
-
-self.addEventListener("push", function (event) {
-  console.log("Push received:", event);
-});
 
 firebase.initializeApp({
   apiKey: "AIzaSyCiboh5YtIxPy-YqzJkafV2mFCqNoFjaR0",
@@ -21,19 +17,90 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage(function (payload) {
-  console.log("Received background message ", payload);
+/* 🔥 CRITICAL PART — ANDROID NEEDS THIS */
+// self.addEventListener("push", function (event) {
+//   if (!event.data) return;
 
-  self.registration.showNotification(payload.notification.title, {
-    body: payload.notification.body,
-    icon: payload.notification.icon,
-    badge: payload.notification.badge,
-    data: payload.data,
-  });
+//   const payload = event.data.json();
+
+//   const notification = payload.notification || payload.data;
+
+//   const title = notification.title || "Hospital Token Update";
+//   const body = notification.body || "Your token is near.";
+
+//   event.waitUntil(
+//     self.registration.showNotification(title, {
+//       body: body,
+//       icon: "/notification-icon.png",
+//       badge: "/notification-icon.png",
+//       vibrate: [300, 150, 300],
+//       requireInteraction: true,
+//       data: {
+//         url: payload?.data?.url || "/",
+//       },
+//     }),
+//   );
+// });
+
+self.addEventListener("push", function (event) {
+  if (!event.data) return;
+
+  let data = {};
+
+  try {
+    data = event.data.json();
+  } catch (e) {
+    data.body = event.data.text();
+  }
+
+  const title = data.title || "Hospital Token Update";
+  const body = data.body || "Your turn is approaching.";
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: body,
+      icon: "/notification-icon.png",
+      badge: "/notification-icon.png",
+      vibrate: [300, 100, 300],
+      requireInteraction: true,
+      data: {
+        url: data.url || "/",
+      },
+    }),
+  );
 });
+
+/* click behaviour */
+// self.addEventListener("notificationclick", function (event) {
+//   event.notification.close();
+
+//   event.waitUntil(
+//     clients
+//       .matchAll({ type: "window", includeUncontrolled: true })
+//       .then(function (clientList) {
+//         for (const client of clientList) {
+//           if (client.url.includes("/") && "focus" in client) {
+//             return client.focus();
+//           }
+//         }
+//         return clients.openWindow(event.notification.data.url);
+//       }),
+//   );
+// });
 
 self.addEventListener("notificationclick", function (event) {
   event.notification.close();
 
-  event.waitUntil(clients.openWindow(event.notification.data?.url || "/"));
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientsArr) => {
+        for (const client of clientsArr) {
+          if (client.url.includes("/") && "focus" in client) {
+            return client.focus();
+          }
+        }
+        return clients.openWindow("/");
+      }),
+  );
 });

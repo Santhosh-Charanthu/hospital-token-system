@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { getFirebaseMessaging } from "../app/firebase";
 import { getToken } from "firebase/messaging";
+import { deleteToken } from "firebase/messaging";
 import "../../styles/TokenAlertModal.css";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -39,16 +40,42 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
         return;
       }
 
-      // register the real service worker
-      const registration = await navigator.serviceWorker.register(
-        "/firebase-messaging-sw.js",
-      );
+      // // register the real service worker
+      // const registration = await navigator.serviceWorker.register(
+      //   "/firebase-messaging-sw.js",
+      // );
 
-      // ensure ready
-      await navigator.serviceWorker.ready;
+      // // ensure ready
+      // await navigator.serviceWorker.ready;
 
-      // Get FCM token
+      // // Get FCM token
+      // const messaging = await getFirebaseMessaging();
+      // const deviceToken = await getToken(messaging, {
+      //   vapidKey:
+      //     "BPax7CFWCKoKcy2t-ywwPge0uNO0V38v6-y0DESVYVrSPrTGYvs_LaKMJBaPsDfBoAIUN-wuuP2ZGtQSIo7uDzc",
+      //   serviceWorkerRegistration: registration,
+      // });
+
       const messaging = await getFirebaseMessaging();
+
+      /* WAIT UNTIL WORKER CONTROLS THE PAGE */
+      let registration = await navigator.serviceWorker.ready;
+
+      // VERY IMPORTANT (this is the real fix)
+      if (!navigator.serviceWorker.controller) {
+        await new Promise((resolve) => {
+          navigator.serviceWorker.addEventListener(
+            "controllerchange",
+            resolve,
+            { once: true },
+          );
+        });
+      }
+
+      /* REMOVE OLD GHOST TOKEN */
+      await deleteToken(messaging);
+
+      /* NOW create REAL token */
       const deviceToken = await getToken(messaging, {
         vapidKey:
           "BPax7CFWCKoKcy2t-ywwPge0uNO0V38v6-y0DESVYVrSPrTGYvs_LaKMJBaPsDfBoAIUN-wuuP2ZGtQSIo7uDzc",

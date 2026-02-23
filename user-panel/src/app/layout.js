@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import FCMInit from "./FCMInit";
 import NotificationProvider from "./notification-provider";
 
 const geistSans = Geist({
@@ -34,6 +35,7 @@ export default function RootLayout({ children }) {
       </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <FCMInit />
         <NotificationProvider />
         {children}
       </body>
