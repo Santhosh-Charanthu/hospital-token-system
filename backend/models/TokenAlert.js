@@ -4,6 +4,7 @@ const tokenAlertSchema = new mongoose.Schema({
   deviceToken: {
     type: String,
     required: true,
+    unique: true,
   },
   patientTokenNumber: {
     type: Number,

@@ -1,25 +1,79 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getFirebaseMessaging } from "../app/firebase";
 import { getToken } from "firebase/messaging";
 import { deleteToken } from "firebase/messaging";
+import TokenSlider from "./TokenSlider";
 import "../../styles/TokenAlertModal.css";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-export default function TokenAlertModal({ open, onClose, activeToken }) {
-  const [tokenNumber, setTokenNumber] = useState("");
+export default function TokenAlertModal({
+  open,
+  onClose,
+  activeToken,
+  upcomingTokens,
+}) {
+  const [tokenNumber, setTokenNumber] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [lastTokenNumber, setLastTokenNumber] = useState(null);
+
+  useEffect(() => {
+    if (!open || !activeToken) return;
+    setTokenNumber(activeToken.tokenNumber);
+  }, [activeToken, open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const fetchInitialLastToken = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/api/tokens/last-generated`);
+
+        if (!res.ok) throw new Error("Failed");
+
+        const data = await res.json();
+        setLastTokenNumber(data.lastGeneratedToken?.tokenNumber);
+      } catch (err) {
+        console.error("Initial last token fetch failed", err);
+      }
+    };
+
+    fetchInitialLastToken();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleLastTokenUpdate = (e) => {
+      setLastTokenNumber(e.detail);
+    };
+
+    window.addEventListener("last-token-updated", handleLastTokenUpdate);
+
+    return () => {
+      window.removeEventListener("last-token-updated", handleLastTokenUpdate);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    if (!activeToken) return;
+    if (!lastTokenNumber) return;
+
+    // when real range arrives, reset selection properly
+    setTokenNumber(activeToken.tokenNumber);
+  }, [lastTokenNumber, activeToken, open]);
 
   if (!open) return null;
 
   const subscribe = async () => {
     setMessage("");
 
-    if (!tokenNumber) {
-      setMessage("Please enter a token number");
+    if (tokenNumber === null) {
+      setMessage("Please select your token number");
       return;
     }
 
@@ -108,6 +162,17 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
     setLoading(false);
   };
 
+  if (!activeToken || lastTokenNumber === null) {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-card">
+          <h2>Token Alerts</h2>
+          <p>Loading token numbers...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="modal-overlay">
       <div className="modal-card">
@@ -117,12 +182,10 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
           of you.
         </p>
 
-        <input
-          type="number"
-          placeholder="Enter your token number"
-          value={tokenNumber}
-          onChange={(e) => setTokenNumber(e.target.value)}
-          className="token-input"
+        <TokenSlider
+          activeToken={activeToken}
+          lastTokenNumber={lastTokenNumber}
+          onChange={(num) => setTokenNumber(num)}
         />
 
         {message && <p className="modal-message">{message}</p>}

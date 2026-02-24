@@ -61,7 +61,7 @@ self.addEventListener("push", function (event) {
       body: body,
       icon: "/notification-icon.png",
       badge: "/notification-icon.png",
-      vibrate: [300, 100, 300],
+      vibrate: [500, 200, 500, 200, 800],
       requireInteraction: true,
       data: {
         url: data.url || "/",

@@ -1,0 +1,78 @@
+.token-slider-container {
+  width: 90%;
+  margin: 30px auto;
+  text-align: center;
+}
+
+/* BIG NUMBER */
+.selected-token-number {
+  font-size: 64px;
+  font-weight: 800;
+  color: #2a7cff;
+  margin-bottom: 18px;
+  letter-spacing: 2px;
+}
+
+/* wrapper for centering */
+.slider-wrapper {
+  position: relative;
+  width: 100%;
+  padding: 20px 0;
+}
+
+/* base slider */
+.token-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #2c3e55;
+  border-radius: 10px;
+  outline: none;
+}
+
+/* progress color (chrome trick) */
+.token-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    #2a7cff 0%,
+    #2a7cff
+      calc(
+        (var(--value, 0) - var(--min, 0)) * 100% /
+          (var(--max, 100) - var(--min, 0))
+      ),
+    #2c3e55
+      calc(
+        (var(--value, 0) - var(--min, 0)) * 100% /
+          (var(--max, 100) - var(--min, 0))
+      )
+  );
+  border-radius: 10px;
+}
+
+/* THE DOT (THUMB) */
+.token-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  background: #2a7cff;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 4px solid #ffffff;
+  margin-top: -8px;
+  box-shadow: 0 0 12px rgba(42, 124, 255, 0.8);
+  transition: 0.2s;
+}
+
+.token-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* min max labels */
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 14px;
+  color: #aaa;
+}

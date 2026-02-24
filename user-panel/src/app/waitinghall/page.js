@@ -3,11 +3,9 @@
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { onMessage } from "firebase/messaging";
-import { getFirebaseMessaging } from "./firebase";
+import { getFirebaseMessaging } from "../firebase";
 import { motion, AnimatePresence } from "framer-motion";
-import TokenAlertModal from "../components/TokenAlertModal";
-import { Bell } from "lucide-react";
-import "../../styles/UserPanel.css";
+import "../../../styles/UserPanel.css";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -102,14 +100,6 @@ export default function UserPanel() {
       setUpcomingTokens(data.upcomingTokens);
     });
 
-    socket.on("TOKEN_CREATED", (data) => {
-      window.dispatchEvent(
-        new CustomEvent("last-token-updated", {
-          detail: data.tokenNumber,
-        }),
-      );
-    });
-
     return () => {
       socket.off("connect");
       socket.off("disconnect");
@@ -121,10 +111,8 @@ export default function UserPanel() {
     try {
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
-        setIsFullscreen(true);
       } else {
         await document.exitFullscreen();
-        setIsFullscreen(false);
       }
     } catch (err) {
       console.error("Fullscreen toggle failed", err);
@@ -181,7 +169,12 @@ export default function UserPanel() {
   // }, []);
 
   return (
-    <div className="screen">
+    <div
+      className="screen"
+      onClick={toggleFullscreen}
+      onTouchStart={toggleFullscreen}
+      style={{ cursor: "pointer" }}
+    >
       {/* 🧭 NAVBAR */}
       <header className="navbar">
         <div className="navbar-left">
@@ -201,12 +194,6 @@ export default function UserPanel() {
           <span>Live Token Status</span>
         </div>
       </header>
-      <TokenAlertModal
-        open={showModal}
-        onClose={() => setShowModal(false)}
-        activeToken={activeToken}
-        upcomingTokens={upcomingTokens}
-      />
 
       {(!isOnline || serverError) && (
         <div className="error-banner">
@@ -257,18 +244,6 @@ export default function UserPanel() {
         </div>
       </main>
       {/* 🔘 FLOATING ACTION BUTTONS */}
-      <div className="fab-container">
-        {/* 🔔 Show bell ONLY when NOT fullscreen */}
-        {!isFullscreen && (
-          <button
-            className="fab fab-bell"
-            onClick={() => setShowModal(true)}
-            aria-label="Enable token alerts"
-          >
-            <Bell size={26} />
-          </button>
-        )}
-      </div>
     </div>
   );
 }

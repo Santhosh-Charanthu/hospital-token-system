@@ -31,16 +31,18 @@ module.exports.generateToken = async (req, res) => {
       tokenNumber: nextTokenNumber,
       status: activeToken ? "WAITING" : "ACTIVE",
     });
-
     await newToken.save();
+
+    const io = req.app.get("io");
+    io.emit("TOKEN_CREATED", {
+      tokenNumber: newToken.tokenNumber,
+    });
 
     // 🔥 Fetch updated state for socket emit
     const updatedActiveToken = await Token.findOne({ status: "ACTIVE" });
     const upcomingTokens = await Token.find({ status: "WAITING" })
       .sort({ createdAt: 1 })
       .limit(5);
-
-    const io = req.app.get("io");
 
     // 🔥 Emit socket update
     io.emit("TOKEN_UPDATE", {
@@ -261,6 +263,30 @@ exports.confirmIssued = async (req, res) => {
   res.json({ success: true });
 };
 
+// module.exports.tokenAlert = async (req, res) => {
+//   try {
+//     const { deviceToken, tokenNumber } = req.body;
+
+//     console.log("DEVICE TOKEN RECEIVED:", deviceToken);
+
+//     if (!deviceToken || !tokenNumber) {
+//       return res.status(400).json({ message: "Missing data" });
+//     }
+
+//     // remove previous subscriptions for this device
+//     await TokenAlert.deleteMany({ deviceToken });
+
+//     await TokenAlert.create({
+//       deviceToken,
+//       patientTokenNumber: tokenNumber,
+//     });
+
+//     res.json({ success: true, message: "Alert subscribed" });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 module.exports.tokenAlert = async (req, res) => {
   try {
     const { deviceToken, tokenNumber } = req.body;
@@ -281,6 +307,11 @@ module.exports.tokenAlert = async (req, res) => {
 
     res.json({ success: true, message: "Alert subscribed" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.log("FCM ERROR:", err.code);
+
+    if (err.code === "messaging/registration-token-not-registered") {
+      console.log("Removing expired token:", alert.deviceToken);
+      await TokenAlert.deleteOne({ deviceToken: alert.deviceToken });
+    }
   }
 };
