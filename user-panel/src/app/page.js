@@ -117,50 +117,15 @@ export default function UserPanel() {
     };
   }, [socket]);
 
-  const toggleFullscreen = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-        setIsFullscreen(true);
-      } else {
-        await document.exitFullscreen();
-        setIsFullscreen(false);
-      }
-    } catch (err) {
-      console.error("Fullscreen toggle failed", err);
-    }
-  };
+  // useEffect(() => {
+  //   if (!navigator.serviceWorker) return;
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
-  }, []);
-
-  useEffect(() => {
-    let unsubscribe;
-
-    const setupForegroundListener = async () => {
-      const messaging = await getFirebaseMessaging();
-      if (!messaging) return;
-
-      unsubscribe = onMessage(messaging, (payload) => {
-        console.log("Foreground notification received:", payload);
-      });
-    };
-
-    setupForegroundListener();
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, []);
+  //   navigator.serviceWorker.addEventListener("message", (event) => {
+  //     if (event.data?.type === "PUSH_HANDLED") {
+  //       localStorage.setItem("lastNotification", event.data.id);
+  //     }
+  //   });
+  // }, []);
 
   // async function requestPerimission() {
   //   const permission = await Notification.requestPermission();

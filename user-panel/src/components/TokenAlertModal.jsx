@@ -4,68 +4,45 @@ import { useState, useEffect } from "react";
 import { getFirebaseMessaging } from "../app/firebase";
 import { getToken } from "firebase/messaging";
 import { deleteToken } from "firebase/messaging";
-import TokenSlider from "./TokenSlider";
+import TokenRoller from "./TokenRoller";
 import "../../styles/TokenAlertModal.css";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-export default function TokenAlertModal({
-  open,
-  onClose,
-  activeToken,
-  upcomingTokens,
-}) {
-  const [tokenNumber, setTokenNumber] = useState(null);
+export default function TokenAlertModal({ open, onClose, activeToken }) {
+  const [lastToken, setLastToken] = useState(null);
+  const [loadingTokens, setLoadingTokens] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [lastTokenNumber, setLastTokenNumber] = useState(null);
+  const [tokenNumber, setTokenNumber] = useState(null);
 
   useEffect(() => {
-    if (!open || !activeToken) return;
-    setTokenNumber(activeToken.tokenNumber);
-  }, [activeToken, open]);
+    if (activeToken && lastToken) {
+      const suggested = Math.min(activeToken.tokenNumber + 3, lastToken);
+      setTokenNumber(suggested);
+    }
+  }, [activeToken, lastToken]);
 
   useEffect(() => {
     if (!open) return;
 
-    const fetchInitialLastToken = async () => {
+    const fetchLastToken = async () => {
       try {
+        setLoadingTokens(true);
+
         const res = await fetch(`${BASE_URL}/api/tokens/last-generated`);
-
-        if (!res.ok) throw new Error("Failed");
-
         const data = await res.json();
-        setLastTokenNumber(data.lastGeneratedToken?.tokenNumber);
+
+        setLastToken(data.lastGeneratedToken.tokenNumber);
       } catch (err) {
-        console.error("Initial last token fetch failed", err);
+        console.error("Failed to fetch last token", err);
+      } finally {
+        setLoadingTokens(false);
       }
     };
 
-    fetchInitialLastToken();
+    fetchLastToken();
   }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const handleLastTokenUpdate = (e) => {
-      setLastTokenNumber(e.detail);
-    };
-
-    window.addEventListener("last-token-updated", handleLastTokenUpdate);
-
-    return () => {
-      window.removeEventListener("last-token-updated", handleLastTokenUpdate);
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    if (!activeToken) return;
-    if (!lastTokenNumber) return;
-
-    // when real range arrives, reset selection properly
-    setTokenNumber(activeToken.tokenNumber);
-  }, [lastTokenNumber, activeToken, open]);
 
   if (!open) return null;
 
@@ -73,7 +50,7 @@ export default function TokenAlertModal({
     setMessage("");
 
     if (tokenNumber === null) {
-      setMessage("Please select your token number");
+      setMessage("Please select your token using the roller");
       return;
     }
 
@@ -162,12 +139,12 @@ export default function TokenAlertModal({
     setLoading(false);
   };
 
-  if (!activeToken || lastTokenNumber === null) {
+  if (loadingTokens || !activeToken || !lastToken) {
     return (
       <div className="modal-overlay">
         <div className="modal-card">
           <h2>Token Alerts</h2>
-          <p>Loading token numbers...</p>
+          <p>Loading available tokens...</p>
         </div>
       </div>
     );
@@ -182,10 +159,11 @@ export default function TokenAlertModal({
           of you.
         </p>
 
-        <TokenSlider
-          activeToken={activeToken}
-          lastTokenNumber={lastTokenNumber}
-          onChange={(num) => setTokenNumber(num)}
+        <TokenRoller
+          startToken={activeToken.tokenNumber}
+          endToken={lastToken}
+          defaultValue={activeToken.tokenNumber}
+          onSelect={(val) => setTokenNumber(val)}
         />
 
         {message && <p className="modal-message">{message}</p>}

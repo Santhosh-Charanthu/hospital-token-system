@@ -106,86 +106,145 @@ module.exports.completeToken = async (req, res) => {
     activeToken.status = "COMPLETED";
     await activeToken.save();
 
+    /* ================= FINAL VISIT MESSAGE ================= */
+
+    const completedAlerts = await TokenAlert.find({
+      patientTokenNumber: activeToken.tokenNumber,
+      stage: { $lt: 6 },
+    });
+
+    for (const alert of completedAlerts) {
+      try {
+        await admin.messaging().send({
+          token: alert.deviceToken,
+          webpush: {
+            headers: { Urgency: "high", TTL: "86400" },
+            data: {
+              title: "Visit Completed",
+              body: "Thank you for visiting Hope Homoeopathy. We wish you good health!",
+              tokenNumber: String(activeToken.tokenNumber),
+              stage: "6",
+              url: "/",
+            },
+          },
+        });
+
+        alert.stage = 6;
+        await alert.save();
+        await TokenAlert.deleteOne({ _id: alert._id });
+
+        console.log("Final visit notification sent");
+      } catch (err) {
+        console.log("Final FCM ERROR:", err.message);
+      }
+    }
+
     // 2️⃣ activate next
     const nextToken = await Token.findOne({ status: "WAITING" }).sort({
       createdAt: 1,
     });
 
+    const completedTokenNumber = activeToken.tokenNumber;
+
     if (nextToken) {
       nextToken.status = "ACTIVE";
       await nextToken.save();
 
-      /* =======================================================
-         🔔 FIREBASE ALERT LOGIC STARTS HERE
-      ======================================================= */
-
       const currentTokenNumber = nextToken.tokenNumber;
 
-      // we check 4 reminder stages
-      const stages = [
-        {
-          diff: 3,
-          stage: 1,
-          message: "Your turn is approaching. Please be ready.",
-        },
-        {
-          diff: 2,
-          stage: 2,
-          message: "Only 2 patients ahead. Please come near OP room.",
-        },
-        {
-          diff: 1,
-          stage: 3,
-          message: "You are next. Kindly wait outside the doctor's room.",
-        },
-        {
-          diff: 0,
-          stage: 4,
-          message: "It is your turn now. Please enter the consultation room.",
-        },
-      ];
+      // find all subscribed users whose turn is still pending
+      // find all relevant subscriptions
+      const alerts = await TokenAlert.find({
+        patientTokenNumber: { $gte: currentTokenNumber - 1 }, // include completed token
+        stage: { $lt: 6 },
+      });
 
-      for (const s of stages) {
-        const targetToken = currentTokenNumber + s.diff;
+      for (const alert of alerts) {
+        const diff = alert.patientTokenNumber - currentTokenNumber;
 
-        const alerts = await TokenAlert.find({
-          patientTokenNumber: targetToken,
-          stage: { $lt: s.stage },
-        });
+        let stageToSend = null;
+        let message = null;
 
-        console.log(`Stage ${s.stage} alerts:`, alerts.length);
+        // 5th prior token
+        if (diff === 5 && alert.stage < 1) {
+          stageToSend = 1;
+          message =
+            "Your appointment is coming up soon. Please plan to reach the clinic.";
 
-        for (const alert of alerts) {
-          try {
-            const response = await admin.messaging().send({
-              token: alert.deviceToken,
+          // 4th prior token (INTENTIONALLY SKIPPED)
 
-              webpush: {
-                headers: {
-                  Urgency: "high",
-                  TTL: "86400",
-                },
+          // 3rd prior token
+        } else if (diff === 3 && alert.stage < 2) {
+          stageToSend = 2;
+          message = "Your turn is approaching. Please be ready.";
 
-                data: {
-                  title: "Hospital Token Update",
-                  body: `Token ${alert.patientTokenNumber}: ${s.message}`,
-                  tokenNumber: String(alert.patientTokenNumber),
-                  stage: String(s.stage),
-                  url: "/", // important for click open
-                },
+          // 2nd prior token
+        } else if (diff === 2 && alert.stage < 3) {
+          stageToSend = 3;
+          message = "Only 2 patients ahead. Please come near OP room.";
+
+          // 1st prior token
+        } else if (diff === 1 && alert.stage < 4) {
+          stageToSend = 4;
+          message = "You are next. Kindly wait outside the doctor's room.";
+
+          // current token
+        } else if (diff === 0 && alert.stage < 5) {
+          stageToSend = 5;
+          message = "It is your turn now. Please enter the consultation room.";
+
+          // AFTER completion (courtesy notification)
+        } else if (
+          alert.patientTokenNumber === completedTokenNumber &&
+          alert.stage < 6
+        ) {
+          stageToSend = 6;
+          message =
+            "Thank you for visiting Hope Homoeopathy. We wish you good health!";
+        }
+
+        if (!stageToSend) continue;
+
+        console.log(
+          `Sending stage ${stageToSend} alert for token ${alert.patientTokenNumber}`,
+        );
+
+        const notificationTitle =
+          stageToSend === 6 ? "Visit Completed" : "Hospital Token Update";
+
+        try {
+          const response = await admin.messaging().send({
+            token: alert.deviceToken,
+            webpush: {
+              headers: {
+                Urgency: "high",
+                TTL: "86400",
               },
-            });
+              data: {
+                title: notificationTitle,
+                body: `Token ${alert.patientTokenNumber}: ${message}`,
+                tokenNumber: String(alert.patientTokenNumber),
+                stage: String(stageToSend),
+                url: "/",
+              },
+            },
+          });
 
-            console.log("Notification sent:", response);
+          console.log("Notification sent:", response);
 
-            // update stage
-            alert.stage = s.stage;
-            await alert.save();
-          } catch (err) {
-            console.log("FCM ERROR:", err.message);
+          alert.stage = stageToSend;
+          await alert.save();
+
+          // auto-unsubscribe after final message
+          if (stageToSend === 6) {
+            await TokenAlert.deleteOne({ _id: alert._id });
           }
+        } catch (err) {
+          console.log("FCM ERROR:", err.message);
         }
       }
+
+      /* ======================================================= */
     }
 
     /* ======================================================= */

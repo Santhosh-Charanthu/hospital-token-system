@@ -1,131 +1,109 @@
 /* ===== MODAL OVERLAY ===== */
-
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.25);
-  backdrop-filter: blur(6px);
+  background: rgba(15, 23, 42, 0.25); /* soft dim instead of dark */
+  backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
-/* ===== CARD ===== */
-
+/* ===== MODAL CARD ===== */
 .modal-card {
   background: #ffffff;
-  border-radius: 22px;
-  padding: 30px 28px 26px;
+  border-radius: 16px;
+  padding: 26px;
   width: 92%;
-  max-width: 420px;
+  max-width: 380px;
   text-align: center;
   color: #1e293b;
-
-  box-shadow:
-    0 18px 50px rgba(37, 99, 235, 0.15),
-    0 3px 12px rgba(0, 0, 0, 0.06);
-
-  animation: popup 0.25s ease;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+  border: 1px solid #e2e8f0;
 }
 
-@keyframes popup {
+/* Heading */
+.modal-card h2 {
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Description text */
+.modal-card p {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 18px;
+  line-height: 1.4;
+}
+
+/* ===== MESSAGE ===== */
+.modal-message {
+  font-size: 14px;
+  margin-top: 10px;
+  margin-bottom: 14px;
+  color: #ef4444; /* error red */
+  font-weight: 500;
+}
+
+/* ===== BUTTONS ===== */
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+/* Cancel button */
+.cancel-btn {
+  flex: 1;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #e2e8f0;
+}
+
+/* Subscribe button (primary medical color) */
+.subscribe-btn {
+  flex: 1;
+  background: #2563eb; /* hospital blue */
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.subscribe-btn:hover {
+  background: #1d4ed8;
+}
+
+.subscribe-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.modal-card {
+  animation: modalPop 0.25s ease;
+}
+
+@keyframes modalPop {
   from {
-    transform: translateY(20px) scale(0.96);
+    transform: translateY(18px) scale(0.95);
     opacity: 0;
   }
   to {
     transform: translateY(0) scale(1);
     opacity: 1;
   }
-}
-
-/* ===== TITLE ===== */
-
-.modal-card h2 {
-  margin-bottom: 8px;
-  font-size: 26px;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-/* ===== DESCRIPTION ===== */
-
-.modal-card p {
-  color: #64748b;
-  font-size: 15px;
-  margin-bottom: 18px;
-  line-height: 1.4;
-}
-
-/* ===== CURRENT TOKEN INFO (ADD IN JSX) ===== */
-
-.current-token {
-  background: #eff6ff;
-  color: #1d4ed8;
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 14px;
-  margin-bottom: 16px;
-  font-weight: 500;
-}
-
-/* ===== MESSAGE ===== */
-
-.modal-message {
-  font-size: 14px;
-  margin-bottom: 14px;
-  color: #16a34a;
-  font-weight: 500;
-}
-
-/* ===== BUTTONS ===== */
-
-.modal-actions {
-  display: flex;
-  gap: 14px;
-  margin-top: 18px;
-}
-
-/* Cancel */
-
-.cancel-btn {
-  flex: 1;
-  background: #e2e8f0;
-  color: #334155;
-  border: none;
-  padding: 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: 0.18s;
-}
-
-.cancel-btn:hover {
-  background: #cbd5e1;
-}
-
-/* Subscribe */
-
-.subscribe-btn {
-  flex: 1;
-  background: #22c55e;
-  color: white;
-  border: none;
-  padding: 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 700;
-  transition: 0.18s;
-  box-shadow: 0 6px 18px rgba(34, 197, 94, 0.28);
-}
-
-.subscribe-btn:hover {
-  background: #16a34a;
-  transform: translateY(-1px);
-}
-
-.subscribe-btn:disabled {
-  opacity: 0.6;
-  transform: none;
 }

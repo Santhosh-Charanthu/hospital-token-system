@@ -1,0 +1,54 @@
+.roller-wrapper {
+  position: relative;
+  height: 220px;
+  width: 120px;
+  margin: 20px auto;
+  overflow: hidden;
+}
+
+/* center selection bar */
+.highlight-line {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 48px;
+  width: 100%;
+  border-top: 2px solid #2f80ed;
+  border-bottom: 2px solid #2f80ed;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* This is the MAGIC */
+.roller-spacer {
+  height: 85px;
+  scroll-snap-align: none;
+}
+
+.roller-container {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+
+.roller-container::-webkit-scrollbar {
+  display: none;
+}
+
+.roller-item {
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
+  font-size: 22px;
+  color: #999;
+  scroll-snap-align: center;
+  transition: all 0.2s ease;
+}
+
+/* selected item */
+.roller-item.active {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2f80ed;
+}

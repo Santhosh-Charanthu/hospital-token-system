@@ -5,6 +5,8 @@ import io from "socket.io-client";
 import { onMessage } from "firebase/messaging";
 import { getFirebaseMessaging } from "../firebase";
 import { motion, AnimatePresence } from "framer-motion";
+import TokenAlertModal from "../../components/TokenAlertModal";
+import { Bell } from "lucide-react";
 import "../../../styles/UserPanel.css";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -107,29 +109,15 @@ export default function UserPanel() {
     };
   }, [socket]);
 
-  const toggleFullscreen = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-      } else {
-        await document.exitFullscreen();
-      }
-    } catch (err) {
-      console.error("Fullscreen toggle failed", err);
-    }
-  };
+  // useEffect(() => {
+  //   if (!navigator.serviceWorker) return;
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
-  }, []);
+  //   navigator.serviceWorker.addEventListener("message", (event) => {
+  //     if (event.data?.type === "PUSH_HANDLED") {
+  //       localStorage.setItem("lastNotification", event.data.id);
+  //     }
+  //   });
+  // }, []);
 
   useEffect(() => {
     let unsubscribe;
@@ -139,7 +127,7 @@ export default function UserPanel() {
       if (!messaging) return;
 
       unsubscribe = onMessage(messaging, (payload) => {
-        console.log("Foreground notification received:", payload);
+        console.log("Foreground FCM:", payload);
       });
     };
 
@@ -168,13 +156,36 @@ export default function UserPanel() {
   //   requestPerimission();
   // }, []);
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        // Enter fullscreen
+        await document.documentElement.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        // Exit fullscreen
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    } catch (err) {
+      console.error("Fullscreen error:", err);
+    }
+  };
+
   return (
-    <div
-      className="screen"
-      onClick={toggleFullscreen}
-      onTouchStart={toggleFullscreen}
-      style={{ cursor: "pointer" }}
-    >
+    <div className="screen waiting-hall-screen" onClick={toggleFullscreen}>
       {/* 🧭 NAVBAR */}
       <header className="navbar">
         <div className="navbar-left">
@@ -243,7 +254,6 @@ export default function UserPanel() {
           </AnimatePresence>
         </div>
       </main>
-      {/* 🔘 FLOATING ACTION BUTTONS */}
     </div>
   );
 }
