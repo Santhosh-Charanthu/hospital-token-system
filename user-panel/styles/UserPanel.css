@@ -373,3 +373,12 @@
     gap: 12px;
   }
 }
+
+.waiting-hall-screen {
+  cursor: pointer;
+}
+
+/* hide cursor in fullscreen for TV display */
+:fullscreen .waiting-hall-screen {
+  cursor: none;
+}

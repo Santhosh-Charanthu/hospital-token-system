@@ -1,25 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getFirebaseMessaging } from "../app/firebase";
 import { getToken } from "firebase/messaging";
 import { deleteToken } from "firebase/messaging";
+import TokenRoller from "./TokenRoller";
 import "../../styles/TokenAlertModal.css";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function TokenAlertModal({ open, onClose, activeToken }) {
-  const [tokenNumber, setTokenNumber] = useState("");
+  const [lastToken, setLastToken] = useState(null);
+  const [loadingTokens, setLoadingTokens] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [tokenNumber, setTokenNumber] = useState(null);
+
+  useEffect(() => {
+    if (activeToken && lastToken) {
+      const suggested = Math.min(activeToken.tokenNumber + 3, lastToken);
+      setTokenNumber(suggested);
+    }
+  }, [activeToken, lastToken]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const fetchLastToken = async () => {
+      try {
+        setLoadingTokens(true);
+
+        const res = await fetch(`${BASE_URL}/api/tokens/last-generated`);
+        const data = await res.json();
+
+        setLastToken(data.lastGeneratedToken.tokenNumber);
+      } catch (err) {
+        console.error("Failed to fetch last token", err);
+      } finally {
+        setLoadingTokens(false);
+      }
+    };
+
+    fetchLastToken();
+  }, [open]);
 
   if (!open) return null;
 
   const subscribe = async () => {
     setMessage("");
 
-    if (!tokenNumber) {
-      setMessage("Please enter a token number");
+    if (tokenNumber === null) {
+      setMessage("Please select your token using the roller");
       return;
     }
 
@@ -108,6 +139,17 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
     setLoading(false);
   };
 
+  if (loadingTokens || !activeToken || !lastToken) {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-card">
+          <h2>Token Alerts</h2>
+          <p>Loading available tokens...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="modal-overlay">
       <div className="modal-card">
@@ -117,12 +159,11 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
           of you.
         </p>
 
-        <input
-          type="number"
-          placeholder="Enter your token number"
-          value={tokenNumber}
-          onChange={(e) => setTokenNumber(e.target.value)}
-          className="token-input"
+        <TokenRoller
+          startToken={activeToken.tokenNumber}
+          endToken={lastToken}
+          defaultValue={activeToken.tokenNumber}
+          onSelect={(val) => setTokenNumber(val)}
         />
 
         {message && <p className="modal-message">{message}</p>}

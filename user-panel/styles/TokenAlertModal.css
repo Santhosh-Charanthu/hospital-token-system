@@ -1,86 +1,109 @@
-/* ===== MODAL ===== */
-
+/* ===== MODAL OVERLAY ===== */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(2, 6, 23, 0.75);
-  backdrop-filter: blur(6px);
+  background: rgba(15, 23, 42, 0.25); /* soft dim instead of dark */
+  backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
+/* ===== MODAL CARD ===== */
 .modal-card {
-  background: #0f172a;
-  border: 1px solid #334155;
-  border-radius: 18px;
-  padding: 28px;
-  width: 90%;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 26px;
+  width: 92%;
   max-width: 380px;
   text-align: center;
-  color: white;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  color: #1e293b;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+  border: 1px solid #e2e8f0;
 }
 
+/* Heading */
 .modal-card h2 {
-  margin-bottom: 10px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #0f172a;
 }
 
+/* Description text */
 .modal-card p {
-  color: #94a3b8;
+  color: #64748b;
   font-size: 14px;
   margin-bottom: 18px;
+  line-height: 1.4;
 }
 
-.token-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #334155;
-  background: #020617;
-  color: white;
-  font-size: 16px;
-  margin-bottom: 12px;
-  text-align: center;
-}
-
-.token-input:focus {
-  outline: none;
-  border-color: #22c55e;
-}
-
+/* ===== MESSAGE ===== */
 .modal-message {
   font-size: 14px;
-  margin-bottom: 12px;
-  color: #22c55e;
+  margin-top: 10px;
+  margin-bottom: 14px;
+  color: #ef4444; /* error red */
+  font-weight: 500;
 }
 
+/* ===== BUTTONS ===== */
 .modal-actions {
   display: flex;
   gap: 12px;
+  margin-top: 14px;
 }
 
+/* Cancel button */
 .cancel-btn {
   flex: 1;
-  background: #334155;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #e2e8f0;
+}
+
+/* Subscribe button (primary medical color) */
+.subscribe-btn {
+  flex: 1;
+  background: #2563eb; /* hospital blue */
   color: white;
   border: none;
   padding: 12px;
   border-radius: 10px;
   cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
-.subscribe-btn {
-  flex: 1;
-  background: #22c55e;
-  color: black;
-  border: none;
-  padding: 12px;
-  border-radius: 10px;
-  cursor: pointer;
+.subscribe-btn:hover {
+  background: #1d4ed8;
 }
 
 .subscribe-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.modal-card {
+  animation: modalPop 0.25s ease;
+}
+
+@keyframes modalPop {
+  from {
+    transform: translateY(18px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
