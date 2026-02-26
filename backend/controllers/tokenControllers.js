@@ -114,33 +114,43 @@ module.exports.completeToken = async (req, res) => {
     if (nextToken) {
       nextToken.status = "ACTIVE";
       await nextToken.save();
+    }
 
-      const currentTokenNumber = nextToken.tokenNumber;
+    const currentTokenNumber = nextToken
+      ? nextToken.tokenNumber
+      : activeToken.tokenNumber + 1;
 
-      // find all subscribed users whose turn is still pending
-      const alerts = await TokenAlert.find({
-        patientTokenNumber: { $gte: currentTokenNumber },
-        stage: { $lt: 4 },
-      });
+    // find all subscribed users whose turn is still pending
+    const alerts = await TokenAlert.find({
+      patientTokenNumber: { $gte: currentTokenNumber - 1 },
+      stage: { $lt: 6 },
+    });
 
-      for (const alert of alerts) {
-        const diff = alert.patientTokenNumber - currentTokenNumber;
+    for (const alert of alerts) {
+      const diff = alert.patientTokenNumber - currentTokenNumber;
 
         let stageToSend = null;
         let message = null;
 
-        if (diff === 3 && alert.stage < 1) {
+        if (diff === 5 && alert.stage < 1) {
           stageToSend = 1;
-          message = "Your turn is approaching. Please be ready.";
-        } else if (diff === 2 && alert.stage < 2) {
+          message = "5 patients ahead. Please plan to arrive near the OP room.";
+        } else if (diff === 3 && alert.stage < 2) {
           stageToSend = 2;
-          message = "Only 2 patients ahead. Please come near OP room.";
-        } else if (diff === 1 && alert.stage < 3) {
+          message = "3 patients ahead. Please be ready.";
+        } else if (diff === 2 && alert.stage < 3) {
           stageToSend = 3;
-          message = "You are next. Kindly wait outside the doctor's room.";
-        } else if (diff === 0 && alert.stage < 4) {
+          message = "Only 2 patients ahead. Please come near the OP room.";
+        } else if (diff === 1 && alert.stage < 4) {
           stageToSend = 4;
+          message = "You are next. Kindly wait outside the doctor's room.";
+        } else if (diff === 0 && alert.stage < 5) {
+          stageToSend = 5;
           message = "It is your turn now. Please enter the consultation room.";
+        } else if (diff === -1 && alert.stage < 6) {
+          stageToSend = 6;
+          message =
+            "Thank you for visiting. We hope you had a comfortable consultation.";
         }
 
         // If no stage applies, skip
@@ -200,9 +210,6 @@ module.exports.completeToken = async (req, res) => {
         } catch (err) {
           console.log("FCM ERROR:", err.message);
         }
-      }
-
-      /* ======================================================= */
     }
 
     /* ======================================================= */
@@ -325,6 +332,8 @@ module.exports.tokenAlert = async (req, res) => {
     res.json({ success: true, message: "Alert subscribed" });
   } catch (err) {
     console.log("tokenAlert error:", err.message);
-    res.status(500).json({ success: false, message: "Failed to subscribe alert" });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to subscribe alert" });
   }
 };
