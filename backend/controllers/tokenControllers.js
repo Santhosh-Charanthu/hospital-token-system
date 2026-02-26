@@ -151,8 +151,25 @@ module.exports.completeToken = async (req, res) => {
         );
 
         try {
+          const title = "Hospital Token Update";
+          const body = `Token ${alert.patientTokenNumber}: ${message}`;
+          const notificationTag = `${alert.patientTokenNumber}-${stageToSend}`;
+
           const response = await admin.messaging().send({
             token: alert.deviceToken,
+
+            notification: {
+              title,
+              body,
+            },
+
+            data: {
+              title,
+              body,
+              tokenNumber: String(alert.patientTokenNumber),
+              stage: String(stageToSend),
+              url: "/",
+            },
 
             webpush: {
               headers: {
@@ -160,12 +177,17 @@ module.exports.completeToken = async (req, res) => {
                 TTL: "86400",
               },
 
-              data: {
-                title: "Hospital Token Update",
-                body: `Token ${alert.patientTokenNumber}: ${message}`,
-                tokenNumber: String(alert.patientTokenNumber),
-                stage: String(stageToSend),
-                url: "/",
+              notification: {
+                title,
+                body,
+                icon: "/notification-icon.png",
+                badge: "/notification-icon.png",
+                tag: notificationTag,
+                requireInteraction: true,
+              },
+
+              fcmOptions: {
+                link: FRONTEND_URL || "/",
               },
             },
           });
@@ -302,11 +324,7 @@ module.exports.tokenAlert = async (req, res) => {
 
     res.json({ success: true, message: "Alert subscribed" });
   } catch (err) {
-    console.log("FCM ERROR:", err.code);
-
-    if (err.code === "messaging/registration-token-not-registered") {
-      console.log("Removing expired token:", alert.deviceToken);
-      await TokenAlert.deleteOne({ deviceToken: alert.deviceToken });
-    }
+    console.log("tokenAlert error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to subscribe alert" });
   }
 };

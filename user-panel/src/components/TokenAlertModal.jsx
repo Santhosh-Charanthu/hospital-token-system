@@ -62,6 +62,18 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
     try {
       setLoading(true);
 
+      if (!("Notification" in window) || !("serviceWorker" in navigator)) {
+        setMessage("Notifications are not supported on this browser");
+        setLoading(false);
+        return;
+      }
+
+      if (!window.isSecureContext) {
+        setMessage("Open this site on HTTPS (or localhost) to enable alerts");
+        setLoading(false);
+        return;
+      }
+
       // Ask permission
       const permission = await Notification.requestPermission();
 
@@ -71,47 +83,45 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
         return;
       }
 
-      // // register the real service worker
-      // const registration = await navigator.serviceWorker.register(
-      //   "/firebase-messaging-sw.js",
-      // );
-
-      // // ensure ready
-      // await navigator.serviceWorker.ready;
-
-      // // Get FCM token
-      // const messaging = await getFirebaseMessaging();
-      // const deviceToken = await getToken(messaging, {
-      //   vapidKey:
-      //     "BPax7CFWCKoKcy2t-ywwPge0uNO0V38v6-y0DESVYVrSPrTGYvs_LaKMJBaPsDfBoAIUN-wuuP2ZGtQSIo7uDzc",
-      //   serviceWorkerRegistration: registration,
-      // });
-
       const messaging = await getFirebaseMessaging();
 
-      /* WAIT UNTIL WORKER CONTROLS THE PAGE */
-      let registration = await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.register(
+        "/firebase-messaging-sw.js",
+        {
+          scope: "/",
+          updateViaCache: "none",
+        },
+      );
 
-      // VERY IMPORTANT (this is the real fix)
+      await registration.update();
+      await navigator.serviceWorker.ready;
+
       if (!navigator.serviceWorker.controller) {
-        await new Promise((resolve) => {
-          navigator.serviceWorker.addEventListener(
-            "controllerchange",
-            resolve,
-            { once: true },
-          );
+        await new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error("Service worker did not take control"));
+          }, 8000);
+
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            clearTimeout(timeout);
+            resolve();
+          }, { once: true });
         });
       }
 
-      /* REMOVE OLD GHOST TOKEN */
       await deleteToken(messaging);
 
-      /* NOW create REAL token */
       const deviceToken = await getToken(messaging, {
         vapidKey:
           "BPax7CFWCKoKcy2t-ywwPge0uNO0V38v6-y0DESVYVrSPrTGYvs_LaKMJBaPsDfBoAIUN-wuuP2ZGtQSIo7uDzc",
         serviceWorkerRegistration: registration,
       });
+
+      if (!deviceToken) {
+        setMessage("Unable to get notification token on this mobile browser");
+        setLoading(false);
+        return;
+      }
 
       // Send to backend
       const res = await fetch(`${BASE_URL}/api/tokens/token-alert`, {
@@ -129,11 +139,11 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
         setMessage("You will be notified before your turn.");
         setTimeout(onClose, 1500);
       } else {
-        setMessage("Subscription failed");
+        setMessage(data.message || "Subscription failed");
       }
     } catch (err) {
       console.error(err);
-      setMessage("Something went wrong");
+      setMessage(err.message || "Something went wrong");
     }
 
     setLoading(false);
