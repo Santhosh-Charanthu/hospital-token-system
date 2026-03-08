@@ -102,10 +102,14 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
             reject(new Error("Service worker did not take control"));
           }, 8000);
 
-          navigator.serviceWorker.addEventListener("controllerchange", () => {
-            clearTimeout(timeout);
-            resolve();
-          }, { once: true });
+          navigator.serviceWorker.addEventListener(
+            "controllerchange",
+            () => {
+              clearTimeout(timeout);
+              resolve();
+            },
+            { once: true },
+          );
         });
       }
 
@@ -165,7 +169,7 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
       <div className="modal-card">
         <h2>Token Alerts</h2>
         <p>
-          Enter your token number. We will notify you when 3 patients are ahead
+          Enter your token number. We will notify you when 5 patients are ahead
           of you.
         </p>
 

@@ -129,87 +129,87 @@ module.exports.completeToken = async (req, res) => {
     for (const alert of alerts) {
       const diff = alert.patientTokenNumber - currentTokenNumber;
 
-        let stageToSend = null;
-        let message = null;
+      let stageToSend = null;
+      let message = null;
 
-        if (diff === 5 && alert.stage < 1) {
-          stageToSend = 1;
-          message = "5 patients ahead. Please plan to arrive near the OP room.";
-        } else if (diff === 3 && alert.stage < 2) {
-          stageToSend = 2;
-          message = "3 patients ahead. Please be ready.";
-        } else if (diff === 2 && alert.stage < 3) {
-          stageToSend = 3;
-          message = "Only 2 patients ahead. Please come near the OP room.";
-        } else if (diff === 1 && alert.stage < 4) {
-          stageToSend = 4;
-          message = "You are next. Kindly wait outside the doctor's room.";
-        } else if (diff === 0 && alert.stage < 5) {
-          stageToSend = 5;
-          message = "It is your turn now. Please enter the consultation room.";
-        } else if (diff === -1 && alert.stage < 6) {
-          stageToSend = 6;
-          message =
-            "Thank you for visiting. We hope you had a comfortable consultation.";
-        }
+      if (diff === 5 && alert.stage < 1) {
+        stageToSend = 1;
+        message = "5 patients ahead. Please be ready.";
+      } else if (diff === 3 && alert.stage < 2) {
+        stageToSend = 2;
+        message = "3 patients ahead. Please be ready.";
+      } else if (diff === 2 && alert.stage < 3) {
+        stageToSend = 3;
+        message = "Only 2 patients ahead. Please be ready.";
+      } else if (diff === 1 && alert.stage < 4) {
+        stageToSend = 4;
+        message = "You are next. Kindly wait for your turn.";
+      } else if (diff === 0 && alert.stage < 5) {
+        stageToSend = 5;
+        message = "It is your turn now. Please enter the consultation room.";
+      } else if (diff === -1 && alert.stage < 6) {
+        stageToSend = 6;
+        message =
+          "Thank you for visiting. We hope you had a comfortable consultation.";
+      }
 
-        // If no stage applies, skip
-        if (!stageToSend) continue;
+      // If no stage applies, skip
+      if (!stageToSend) continue;
 
-        console.log(
-          `Sending stage ${stageToSend} alert for token ${alert.patientTokenNumber}`,
-        );
+      console.log(
+        `Sending stage ${stageToSend} alert for token ${alert.patientTokenNumber}`,
+      );
 
-        try {
-          const title = "Hospital Token Update";
-          const body = `Token ${alert.patientTokenNumber}: ${message}`;
-          const notificationTag = `${alert.patientTokenNumber}-${stageToSend}`;
+      try {
+        const title = "Hospital Token Update";
+        const body = `Token ${alert.patientTokenNumber}: ${message}`;
+        const notificationTag = `${alert.patientTokenNumber}-${stageToSend}`;
 
-          const response = await admin.messaging().send({
-            token: alert.deviceToken,
+        const response = await admin.messaging().send({
+          token: alert.deviceToken,
+
+          notification: {
+            title,
+            body,
+          },
+
+          data: {
+            title,
+            body,
+            tokenNumber: String(alert.patientTokenNumber),
+            stage: String(stageToSend),
+            url: "/",
+          },
+
+          webpush: {
+            headers: {
+              Urgency: "high",
+              TTL: "86400",
+            },
 
             notification: {
               title,
               body,
+              icon: "/notification-icon.png",
+              badge: "/notification-icon.png",
+              tag: notificationTag,
+              requireInteraction: true,
             },
 
-            data: {
-              title,
-              body,
-              tokenNumber: String(alert.patientTokenNumber),
-              stage: String(stageToSend),
-              url: "/",
+            fcmOptions: {
+              link: FRONTEND_URL || "/",
             },
+          },
+        });
 
-            webpush: {
-              headers: {
-                Urgency: "high",
-                TTL: "86400",
-              },
+        console.log("Notification sent:", response);
 
-              notification: {
-                title,
-                body,
-                icon: "/notification-icon.png",
-                badge: "/notification-icon.png",
-                tag: notificationTag,
-                requireInteraction: true,
-              },
-
-              fcmOptions: {
-                link: FRONTEND_URL || "/",
-              },
-            },
-          });
-
-          console.log("Notification sent:", response);
-
-          // update progress stage
-          alert.stage = stageToSend;
-          await alert.save();
-        } catch (err) {
-          console.log("FCM ERROR:", err.message);
-        }
+        // update progress stage
+        alert.stage = stageToSend;
+        await alert.save();
+      } catch (err) {
+        console.log("FCM ERROR:", err.message);
+      }
     }
 
     /* ======================================================= */
