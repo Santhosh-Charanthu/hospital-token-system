@@ -261,6 +261,7 @@ module.exports.resetTokens = async (req, res) => {
   try {
     // ⚠️ Delete all tokens
     await Token.deleteMany({});
+    await TokenAlert.deleteMany({});
 
     // 🔥 Emit empty state
     const io = req.app.get("io");
