@@ -11,6 +11,25 @@ import "../../styles/UserPanel.css";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+function showForegroundNotification(payload) {
+  if (typeof window === "undefined") return;
+  if (!("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+
+  const notificationPayload = payload?.notification || {};
+  const dataPayload = payload?.data || {};
+
+  const title = dataPayload.title || notificationPayload.title || "Hospital Token Update";
+  const body = dataPayload.body || notificationPayload.body || "Token update available";
+  const icon = dataPayload.icon || notificationPayload.icon || "/notification-icon.png";
+
+  new Notification(title, {
+    body,
+    icon,
+    badge: icon,
+  });
+}
+
 export default function UserPanel() {
   const [socket, setSocket] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -117,33 +136,29 @@ export default function UserPanel() {
     };
   }, [socket]);
 
-  // useEffect(() => {
-  //   if (!navigator.serviceWorker) return;
+  useEffect(() => {
+    let unsubscribe;
 
-  //   navigator.serviceWorker.addEventListener("message", (event) => {
-  //     if (event.data?.type === "PUSH_HANDLED") {
-  //       localStorage.setItem("lastNotification", event.data.id);
-  //     }
-  //   });
-  // }, []);
+    const setupForegroundListener = async () => {
+      try {
+        const messaging = await getFirebaseMessaging();
+        if (!messaging) return;
 
-  // async function requestPerimission() {
-  //   const permission = await Notification.requestPermission();
-  //   if (permission === "granted") {
-  //     const messaging = await getFirebaseMessaging();
-  //     const token = await getToken(messaging, {
-  //       vapidKey:
-  //         "BPax7CFWCKoKcy2t-ywwPge0uNO0V38v6-y0DESVYVrSPrTGYvs_LaKMJBaPsDfBoAIUN-wuuP2ZGtQSIo7uDzc",
-  //     });
-  //     console.log("Token Gen", token);
-  //   } else if (permission == "denied") {
-  //     alert("You denied for the notification");
-  //   }
-  // }
+        unsubscribe = onMessage(messaging, (payload) => {
+          console.log("Foreground FCM:", payload);
+          showForegroundNotification(payload);
+        });
+      } catch (err) {
+        console.log("Foreground messaging unavailable:", err.message);
+      }
+    };
 
-  // useEffect(() => {
-  //   requestPerimission();
-  // }, []);
+    setupForegroundListener();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="screen">
