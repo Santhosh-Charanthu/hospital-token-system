@@ -11,6 +11,28 @@ import "../../../styles/UserPanel.css";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+function showForegroundNotification(payload) {
+  if (typeof window === "undefined") return;
+  if (!("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+
+  const notificationPayload = payload?.notification || {};
+  const dataPayload = payload?.data || {};
+
+  const title =
+    dataPayload.title || notificationPayload.title || "Hospital Token Update";
+  const body =
+    dataPayload.body || notificationPayload.body || "Token update available";
+  const icon =
+    dataPayload.icon || notificationPayload.icon || "/notification-icon.png";
+
+  new Notification(title, {
+    body,
+    icon,
+    badge: icon,
+  });
+}
+
 export default function UserPanel() {
   const [socket, setSocket] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -123,12 +145,17 @@ export default function UserPanel() {
     let unsubscribe;
 
     const setupForegroundListener = async () => {
-      const messaging = await getFirebaseMessaging();
-      if (!messaging) return;
+      try {
+        const messaging = await getFirebaseMessaging();
+        if (!messaging) return;
 
-      unsubscribe = onMessage(messaging, (payload) => {
-        console.log("Foreground FCM:", payload);
-      });
+        unsubscribe = onMessage(messaging, (payload) => {
+          console.log("Foreground FCM:", payload);
+          showForegroundNotification(payload);
+        });
+      } catch (err) {
+        console.log("Foreground messaging unavailable:", err.message);
+      }
     };
 
     setupForegroundListener();

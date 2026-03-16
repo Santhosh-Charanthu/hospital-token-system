@@ -25,58 +25,59 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener("push", async (event) => {
-  if (!event.data) return;
+self.addEventListener("push", (event) => {
+  event.waitUntil(
+    (async () => {
+      if (!event.data) return;
 
-  let payload;
+      let payload;
 
-  try {
-    payload = event.data.json();
-  } catch (err) {
-    console.log("Push JSON parse failed");
-    return;
-  }
+      try {
+        payload = event.data.json();
+      } catch (err) {
+        console.log("Push JSON parse failed");
+        return;
+      }
 
-  const data = payload.data || {};
-  const notificationPayload = payload.notification || {};
+      const data = payload.data || {};
+      const notificationPayload = payload.notification || {};
 
-  const title = data.title || notificationPayload.title || "Hospital Token Update";
-  const body = data.body || notificationPayload.body || "Token update available";
-  const tokenNumber = data.tokenNumber || "unknown";
-  const stage = data.stage || "0";
-  const notificationId = `${tokenNumber}-${stage}`;
+      const title =
+        data.title || notificationPayload.title || "Hospital Token Update";
+      const body =
+        data.body || notificationPayload.body || "Token update available";
+      const tokenNumber = data.tokenNumber || "unknown";
+      const stage = data.stage || "0";
+      const notificationId = `${tokenNumber}-${stage}`;
 
-  const clientsList = await clients.matchAll({
-    type: "window",
-    includeUncontrolled: true,
-  });
-
-  let isVisible = false;
-
-  for (const client of clientsList) {
-    if (client.visibilityState === "visible" && client.focused) {
-      isVisible = true;
-      client.postMessage({
-        type: "PUSH_HANDLED",
-        id: notificationId,
+      const clientsList = await clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
       });
-    }
-  }
 
-  if (isVisible) return;
+      for (const client of clientsList) {
+        client.postMessage({
+          type: "PUSH_HANDLED",
+          id: notificationId,
+          payload,
+        });
+      }
 
-  await self.registration.showNotification(title, {
-    body,
-    icon: data.icon || notificationPayload.icon || "/notification-icon.png",
-    badge: data.badge || notificationPayload.badge || "/notification-icon.png",
-    vibrate: [500, 200, 500, 200, 800],
-    requireInteraction: true,
-    renotify: true,
-    tag: notificationId,
-    data: {
-      url: data.url || "/",
-    },
-  });
+      await self.registration.showNotification(title, {
+        body,
+        icon: data.icon || notificationPayload.icon || "/notification-icon.png",
+        badge:
+          data.badge || notificationPayload.badge || "/notification-icon.png",
+        vibrate: [500, 200, 500, 200, 800],
+        requireInteraction: true,
+        renotify: true,
+        tag: notificationId,
+        data: {
+          url: data.url || "/",
+        },
+      });
+    })(),
+  );
 });
 
 self.addEventListener("notificationclick", function (event) {
