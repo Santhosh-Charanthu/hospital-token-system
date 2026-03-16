@@ -8,6 +8,66 @@ import TokenRoller from "./TokenRoller";
 import "../../styles/TokenAlertModal.css";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const IOS_USER_AGENT_REGEX = /iPad|iPhone|iPod/;
+
+function isIosDevice() {
+  if (typeof window === "undefined") return false;
+
+  return IOS_USER_AGENT_REGEX.test(window.navigator.userAgent);
+}
+
+function isStandaloneMode() {
+  if (typeof window === "undefined") return false;
+
+  return (
+    window.matchMedia?.("(display-mode: standalone)")?.matches ||
+    window.navigator.standalone === true
+  );
+}
+
+function getPushSupportError() {
+  if (typeof window === "undefined") return "Notifications are unavailable";
+
+  if (!("Notification" in window) || !("serviceWorker" in navigator)) {
+    return "Notifications are not supported on this browser";
+  }
+
+  if (!("PushManager" in window)) {
+    return "This mobile browser does not support push notifications";
+  }
+
+  if (!window.isSecureContext) {
+    return "Open this site on HTTPS (or localhost) to enable alerts";
+  }
+
+  if (isIosDevice() && !isStandaloneMode()) {
+    return "On iPhone, install this app to your Home Screen and open it from there to enable alerts";
+  }
+
+  return "";
+}
+
+function getFriendlyPushError(error) {
+  const message = error?.message || "";
+  const lowerMessage = message.toLowerCase();
+
+  if (
+    lowerMessage.includes("push service error") ||
+    lowerMessage.includes("registration failed")
+  ) {
+    if (isIosDevice() && !isStandaloneMode()) {
+      return "Push alerts work on iPhone only after installing this app to the Home Screen and opening it from there";
+    }
+
+    return "Push registration failed on this phone. Try Chrome on Android, or install the app to the Home Screen on iPhone and open it from there";
+  }
+
+  if (lowerMessage.includes("fcm not supported")) {
+    return "This browser cannot receive Firebase push notifications";
+  }
+
+  return message || "Something went wrong";
+}
 
 export default function TokenAlertModal({ open, onClose, activeToken }) {
   const [lastToken, setLastToken] = useState(null);
@@ -62,14 +122,9 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
     try {
       setLoading(true);
 
-      if (!("Notification" in window) || !("serviceWorker" in navigator)) {
-        setMessage("Notifications are not supported on this browser");
-        setLoading(false);
-        return;
-      }
-
-      if (!window.isSecureContext) {
-        setMessage("Open this site on HTTPS (or localhost) to enable alerts");
+      const pushSupportError = getPushSupportError();
+      if (pushSupportError) {
+        setMessage(pushSupportError);
         setLoading(false);
         return;
       }
@@ -147,7 +202,7 @@ export default function TokenAlertModal({ open, onClose, activeToken }) {
       }
     } catch (err) {
       console.error(err);
-      setMessage(err.message || "Something went wrong");
+      setMessage(getFriendlyPushError(err));
     }
 
     setLoading(false);
