@@ -182,7 +182,7 @@ export default function UserPanel() {
       )}
 
       {/* 📺 MAIN CONTENT */}
-      <main className="container">
+      {/* <main className="container">
         <h1 className="title">Now Serving</h1>
 
         <AnimatePresence mode="wait">
@@ -219,6 +219,57 @@ export default function UserPanel() {
               <p>No tokens in queue</p>
             )}
           </AnimatePresence>
+        </div>
+      </main> */}
+      <main className="container">
+        <div className="status-text">
+          <h1>Now Serving Token</h1>
+          <p>Please wait for your number to be displayed</p>
+        </div>
+
+        <div className="token-section">
+          {/* SERVING CARD */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeToken?.tokenNumber || "none"}
+              className="current-token-card"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35 }}
+            >
+              <div className="serving-header">
+                <span className="line"></span>
+                <span>Serving Now</span>
+                <span className="line"></span>
+              </div>
+
+              <div className="token-number">
+                {activeToken ? activeToken.tokenNumber : "--"}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* NEXT TOKENS CARD */}
+          <div className="next-card">
+            <div className="next-header">
+              <span className="line"></span>
+              <h2>Up Next</h2>
+              <span className="line"></span>
+            </div>
+
+            <div className="next-tokens">
+              {upcomingTokens.map((token) => (
+                <span key={token._id} className="next-token">
+                  {token.tokenNumber}
+                </span>
+              ))}
+            </div>
+
+            <p className="wait-time">
+              Estimated waiting Time : 10 - 15 Minutes
+            </p>
+          </div>
         </div>
       </main>
       {/* 🔘 FLOATING ACTION BUTTONS */}
