@@ -19,9 +19,12 @@ function showForegroundNotification(payload) {
   const notificationPayload = payload?.notification || {};
   const dataPayload = payload?.data || {};
 
-  const title = dataPayload.title || notificationPayload.title || "Hospital Token Update";
-  const body = dataPayload.body || notificationPayload.body || "Token update available";
-  const icon = dataPayload.icon || notificationPayload.icon || "/notification-icon.png";
+  const title =
+    dataPayload.title || notificationPayload.title || "Hospital Token Update";
+  const body =
+    dataPayload.body || notificationPayload.body || "Token update available";
+  const icon =
+    dataPayload.icon || notificationPayload.icon || "/notification-icon.png";
 
   new Notification(title, {
     body,
@@ -239,7 +242,6 @@ export default function UserPanel() {
       <main className="container">
         <div className="status-text">
           <h1>Now Serving Token</h1>
-          <p>Please wait for your number to be displayed</p>
         </div>
 
         <div className="token-section">

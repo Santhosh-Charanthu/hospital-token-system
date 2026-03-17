@@ -290,7 +290,6 @@ export default function UserPanel() {
       <main className="container" style={{ marginTop: "90px" }}>
         <div className="status-text">
           <h1>Now Serving Token</h1>
-          <p>Please wait for your number to be displayed</p>
         </div>
 
         <div className="token-section">
