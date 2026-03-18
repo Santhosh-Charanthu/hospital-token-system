@@ -168,11 +168,6 @@ module.exports.completeToken = async (req, res) => {
         const response = await admin.messaging().send({
           token: alert.deviceToken,
 
-          notification: {
-            title,
-            body,
-          },
-
           data: {
             title,
             body,
